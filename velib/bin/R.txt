@@ -346,7 +346,6 @@ int id buy_with_google 0x7f07000e
 int id checkbox 0x7f07003f
 int id classic 0x7f070011
 int id collapseActionView 0x7f070020
-int id container 0x7f07004e
 int id default_activity_button 0x7f07003a
 int id dialog 0x7f070021
 int id disableHome 0x7f07001b
@@ -366,6 +365,7 @@ int id ifRoom 0x7f07001d
 int id image 0x7f070039
 int id listMode 0x7f070014
 int id list_item 0x7f07003b
+int id map 0x7f07004e
 int id match_parent 0x7f07000c
 int id middle 0x7f070024
 int id monochrome 0x7f070013

@@ -1482,7 +1482,6 @@ containing a value of this type.
         public static final int checkbox=0x7f07003f;
         public static final int classic=0x7f070011;
         public static final int collapseActionView=0x7f070020;
-        public static final int container=0x7f07004e;
         public static final int default_activity_button=0x7f07003a;
         public static final int dialog=0x7f070021;
         public static final int disableHome=0x7f07001b;
@@ -1502,6 +1501,7 @@ containing a value of this type.
         public static final int image=0x7f070039;
         public static final int listMode=0x7f070014;
         public static final int list_item=0x7f07003b;
+        public static final int map=0x7f07004e;
         public static final int match_parent=0x7f07000c;
         public static final int middle=0x7f070024;
         public static final int monochrome=0x7f070013;
