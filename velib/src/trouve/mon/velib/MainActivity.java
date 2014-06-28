@@ -1,5 +1,9 @@
 package trouve.mon.velib;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -8,6 +12,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -68,19 +73,19 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 mMap.setMyLocationEnabled(true);
-                addMarkersToMap();
+                mMap.setOnMyLocationButtonClickListener(new OnMyLocationButtonClickListener(){
+
+					public boolean onMyLocationButtonClick() {
+						centerMapOnMyLocation();
+						return true;
+					}
+                	
+                });
+                addStationMarkersToMap();
             }
         }
     }
     
-    private void addMarkersToMap() {
-        // Uses a colored icon.
-        mMap.addMarker(new MarkerOptions()
-                .position(MY_VELIB_STATION)
-                .title("19001 - OURCQ CRIMEE")
-                .snippet("2 vélos disponibles")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-    }
     
     private void setUpLocationClientIfNeeded() {
         if (mLocationClient == null) {
@@ -99,6 +104,29 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
     	}
     }
 
+    private void addStationMarker(Station station) {
+        // Uses a colored icon.
+        mMap.addMarker(new MarkerOptions()
+                .position(station.getPosition())
+                .title(station.getName())
+                .snippet(station.getAddress())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+    }
+    
+    private void addStationMarkersToMap(){
+    	InputStream inputStream = getResources().openRawResource(R.raw.stations);
+    	List<Station> stations;
+    	try {
+			stations = StationParser.parse(inputStream);
+			for(Station s : stations){
+	    		addStationMarker(s);
+	    	}
+		} catch (IOException e) {
+			//TODO catch IOException
+		}
+    	
+    }
+    
 	@Override
 	public void onLocationChanged(Location location) {
 		

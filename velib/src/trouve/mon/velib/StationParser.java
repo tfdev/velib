@@ -1,5 +1,16 @@
 package trouve.mon.velib;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import android.util.JsonReader;
+
 /*
  [{
 	"number": 19001,
@@ -26,4 +37,113 @@ package trouve.mon.velib;
 
 public class StationParser {
 
+	public static String ATTRIBUTE_NUMBER 				= "number";
+	public static String ATTRIBUTE_NAME 				= "name";
+	public static String ATTRIBUTE_ADDRESS 				= "address";
+	public static String ATTRIBUTE_POSITION 			= "position";
+	public static String ATTRIBUTE_LAT 					= "lat";
+	public static String ATTRIBUTE_LNG 					= "lng";
+	public static String ATTRIBUTE_BANKING 				= "banking";
+	public static String ATTRIBUTE_BONUS 				= "bonus";
+	public static String ATTRIBUTE_STATUS 				= "status";
+	public static String ATTRIBUTE_BIKE_STANDS 			= "bike_stands";
+	public static String ATTRIBUTE_AVAILABLE_BIKE_STANDS 	= "available_bike_stands";
+	public static String ATTRIBUTE_AVAILABLE_BIKE 			= "available_bikes";
+	public static String ATTRIBUTE_LAST_UPDATE 				= "last_update";
+	
+	
+	public static List<Station> parse(InputStream inputStream) throws IOException {
+		List<Station> stations;
+		JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+	    try {
+	    	stations = readStationArray(reader);
+	    }
+	    finally {
+	    	reader.close();
+	    }
+	     
+	    return stations;
+	}
+	
+	private static List<Station> readStationArray(JsonReader reader) throws IOException {
+		List<Station> stations = new ArrayList<Station>();
+		reader.beginArray();
+	    while (reader.hasNext()) {
+	    	stations.add(readStation(reader));
+	    }
+	    reader.endArray();
+	    return stations;
+	}
+
+
+	private static Station readStation(JsonReader reader) throws IOException {
+		Station station = new Station();
+
+	    reader.beginObject();
+	    while (reader.hasNext()) {
+	    	String attribute = reader.nextName();
+	    	if(ATTRIBUTE_ADDRESS.equals(attribute)){
+	    		station.setAddress(reader.nextString());
+	    	}
+	    	else if(ATTRIBUTE_AVAILABLE_BIKE.equals(attribute)){
+	    		station.setAvailableBikes(reader.nextInt());
+	    	}
+	    	else if(ATTRIBUTE_AVAILABLE_BIKE_STANDS.equals(attribute)){
+	    		station.setAvailableBikeStands(reader.nextInt());
+	    	}	
+			else if(ATTRIBUTE_BANKING.equals(attribute)){
+				station.setBanking(reader.nextBoolean());    		
+			}
+			else if(ATTRIBUTE_BIKE_STANDS.equals(attribute)){
+				station.setBikeStands(reader.nextInt());
+			}
+			else if(ATTRIBUTE_BONUS.equals(attribute)){
+				station.setBonus(reader.nextBoolean()); 
+			}
+			else if(ATTRIBUTE_LAST_UPDATE.equals(attribute)){
+				station.setLastUpDate(new Date(reader.nextLong()));
+			}
+			else if(ATTRIBUTE_NAME.equals(attribute)){
+				station.setName(reader.nextString());
+			}
+			else if(ATTRIBUTE_NUMBER.equals(attribute)){
+				station.setNumber(reader.nextInt());
+			}
+			else if(ATTRIBUTE_POSITION.equals(attribute)){
+				station.setPosition(readPosition(reader));
+			}
+			else if(ATTRIBUTE_STATUS.equals(attribute)){
+				station.setStatus(reader.nextString());
+			}
+			else {
+				reader.skipValue();
+		    }
+	     }
+	     reader.endObject();
+	     return station;
+	}
+	
+	private static LatLng readPosition(JsonReader reader) throws IOException {
+		double latitude = 0;
+		double longitude = 0;
+
+	    reader.beginObject();
+	    while (reader.hasNext()) {
+	    	String attribute = reader.nextName();
+	    	if(ATTRIBUTE_LAT.equals(attribute)){
+	    		latitude = reader.nextDouble();
+	    	}
+	    	else if(ATTRIBUTE_LNG.equals(attribute)){
+	    		longitude = reader.nextDouble();
+	    	}
+			else {
+				reader.skipValue();
+				// TODO throw exception
+		    }
+	     }
+	     reader.endObject();
+	     return new LatLng(latitude, longitude);
+	}
+	
+	
 }
