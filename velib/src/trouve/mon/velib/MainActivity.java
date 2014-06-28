@@ -1,8 +1,8 @@
 package trouve.mon.velib;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -14,21 +14,26 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity implements 	ConnectionCallbacks,
 														OnConnectionFailedListener,
 														LocationListener{
 	
-	
-	private static final LatLng MY_VELIB_STATION = new LatLng(48.894104140316266, 2.372946088467279);
+	private static final String TAG = MainActivity.class.getName();
+	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
+	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
 	
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -81,7 +86,7 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
 					}
                 	
                 });
-                addStationMarkersToMap();
+                updateMap();
             }
         }
     }
@@ -103,29 +108,7 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
     		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
     	}
     }
-
-    private void addStationMarker(Station station) {
-        // Uses a colored icon.
-        mMap.addMarker(new MarkerOptions()
-                .position(station.getPosition())
-                .title(station.getName())
-                .snippet(station.getAddress())
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-    }
     
-    private void addStationMarkersToMap(){
-    	InputStream inputStream = getResources().openRawResource(R.raw.stations);
-    	List<Station> stations;
-    	try {
-			stations = StationParser.parse(inputStream);
-			for(Station s : stations){
-	    		addStationMarker(s);
-	    	}
-		} catch (IOException e) {
-			//TODO catch IOException
-		}
-    	
-    }
     
 	@Override
 	public void onLocationChanged(Location location) {
@@ -149,4 +132,45 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
 	public void onDisconnected() {
 		// Do nothing
 	}
+	
+	private void updateMap(){
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) {
+            new DownloadTask().execute(URL_STATION, API_KEY);
+		} else {
+			Toast.makeText(this, "Internet connection disabled", Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	private class DownloadTask extends AsyncTask<String, Void, Boolean> {
+		String TAG = DownloadTask.class.getName();
+		
+	    protected void onPostExecute(Boolean done) {
+	    	if(done){
+	    		StationManager.addMarkers(mMap);
+	    	}
+	    }
+
+		protected Boolean doInBackground(String... param) {
+
+			try {
+				URL url = new URL(param[0]+param[1]);
+		        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		        connection.setReadTimeout(10000 /* milliseconds */);
+		        connection.setConnectTimeout(15000 /* milliseconds */);
+		        connection.setRequestMethod("GET");
+		        connection.setDoInput(true);
+		        connection.connect();
+		        int response = connection.getResponseCode();
+		        Log.d(TAG, "The response is: " + response);
+		        StationManager.update(connection.getInputStream());
+			} catch (Exception e) {
+				Log.e(TAG, "Exception while downloading info", e);
+				return false;
+			}
+			return true;
+		}
+	 }
+
 }

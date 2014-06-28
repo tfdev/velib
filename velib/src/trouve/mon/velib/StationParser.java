@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import android.util.JsonReader;
+import android.util.Log;
 
 /*
  [{
@@ -36,6 +35,8 @@ import android.util.JsonReader;
 
 
 public class StationParser {
+	
+	private static final String TAG = StationParser.class.getName();
 
 	public static String ATTRIBUTE_NUMBER 				= "number";
 	public static String ATTRIBUTE_NAME 				= "name";
@@ -51,28 +52,24 @@ public class StationParser {
 	public static String ATTRIBUTE_AVAILABLE_BIKE 			= "available_bikes";
 	public static String ATTRIBUTE_LAST_UPDATE 				= "last_update";
 	
+
 	
-	public static List<Station> parse(InputStream inputStream) throws IOException {
-		List<Station> stations;
+	public static void parse(InputStream inputStream) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
 	    try {
-	    	stations = readStationArray(reader);
+	    	readStationArray(reader);
 	    }
 	    finally {
 	    	reader.close();
 	    }
-	     
-	    return stations;
 	}
 	
-	private static List<Station> readStationArray(JsonReader reader) throws IOException {
-		List<Station> stations = new ArrayList<Station>();
+	private static void readStationArray(JsonReader reader) throws IOException {
 		reader.beginArray();
 	    while (reader.hasNext()) {
-	    	stations.add(readStation(reader));
+	    	StationManager.INSTANCE.add(readStation(reader));
 	    }
 	    reader.endArray();
-	    return stations;
 	}
 
 
@@ -137,8 +134,8 @@ public class StationParser {
 	    		longitude = reader.nextDouble();
 	    	}
 			else {
+				Log.e(TAG, "Unknow position attribute: "+ attribute);
 				reader.skipValue();
-				// TODO throw exception
 		    }
 	     }
 	     reader.endObject();

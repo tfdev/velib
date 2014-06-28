@@ -2,9 +2,13 @@ package trouve.mon.velib;
 
 import java.sql.Date;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 public class Station {
+	
+	private static final String TAG = Station.class.getName();
 
 	private int number;
 	private String name;
@@ -12,7 +16,7 @@ public class Station {
 	private LatLng position;
 	private boolean banking;
 	private boolean bonus;
-	private String status; // TODO make an enum
+	private Status status;
 	private int bikeStands;
 	private int availableBikeStands;
 	private int availableBikes;
@@ -61,10 +65,19 @@ public class Station {
 	public void setBonus(boolean bonus) {
 		this.bonus = bonus;
 	}
-	public String getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 	public void setStatus(String status) {
+		if("OPEN".equals(status)){
+			this.status = Status.OPEN;
+		}else if("CLOSED".equals(status)){
+			this.status = Status.CLOSED;
+		}else{
+			Log.e(TAG, "Unknown status string: "+status);
+		}	
+	}
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 	public int getBikeStands() {
