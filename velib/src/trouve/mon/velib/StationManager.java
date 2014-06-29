@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -15,8 +16,12 @@ public class StationManager {
 	
 	private static final String TAG = StationManager.class.getName();
 	
-	private static final int STATION_COUNT = 1800;
 	public static StationManager INSTANCE = new StationManager();
+	
+	private static final int STATION_COUNT = 1800;
+	
+	private static final BitmapDescriptor MARKER_BLUE = BitmapDescriptorFactory.fromResource(R.drawable.markerblue);
+	private static final BitmapDescriptor MARKER_RED = BitmapDescriptorFactory.fromResource(R.drawable.markerred);
 	
 	public static void update(InputStream inputStream){
 		try {
@@ -36,10 +41,10 @@ public class StationManager {
 		    if(station.getStatus() == Status.OPEN){
 		    	markerOptions.snippet(station.getAvailableBikes()+" vélos libres - "+
 	            		 			  station.getAvailableBikeStands()+" emplacements libres")
-	            		 	 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+	            		 	 .icon(MARKER_BLUE);
 		    }else{
 		    	markerOptions.snippet("Station fermée")
-  		 			  		 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+  		 			  		 .icon(MARKER_RED);
 		    }
 		    map.addMarker(markerOptions);
 		}
