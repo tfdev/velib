@@ -17,9 +17,18 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.IconGenerator;
 
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -27,6 +36,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.Toast;
 
 
@@ -97,18 +107,44 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
     
-    public BitmapDescriptor getMarkerBlueBitmapDescriptor(){
+    private BitmapDescriptor getMarkerBlueBitmapDescriptor(){
 		if(markerBlueDescriptor == null){
 			markerBlueDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerblue);
 		}
 		return markerBlueDescriptor;
 	}
 	
-	public BitmapDescriptor getMarkerRedBitmapDescriptor(){
+	private BitmapDescriptor getMarkerRedBitmapDescriptor(){
 		if(markerRedDescriptor == null){
 			markerRedDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerred);
 		}
 		return markerRedDescriptor;
+	}
+	
+	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
+//		IconGenerator generator = new IconGenerator(this);
+//		generator.setContentView(getLayoutInflater().inflate(R.layout.marker, null));
+//		return BitmapDescriptorFactory.fromBitmap(generator.makeIcon(""+bikes));
+		
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inMutable = true;
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, options);
+		Canvas canvas = new Canvas(bitmap);
+		
+		Paint textPaint = new Paint();
+		textPaint.setColor(Color.argb(200, 0, 102, 204));
+		textPaint.setTextAlign(Paint.Align.CENTER);
+		textPaint.setTextSize(22);
+		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		textPaint.setStyle(Style.FILL_AND_STROKE);
+		
+		canvas.drawText(""+bikes, bitmap.getWidth()/2, bitmap.getHeight()/2 - 22, textPaint);
+		
+		textPaint.setColor(Color.argb(200, 204, 204, 0));
+		
+		canvas.drawText(""+stands, bitmap.getWidth()/2, bitmap.getHeight()/2, textPaint);
+
+		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
     
     public void addMarkers() {
@@ -123,7 +159,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		    if(station.getStatus() == Status.OPEN){
 		    	markerOptions.snippet(station.getAvailableBikes()+" vélos libres - "+ //TODO intl
 	            		 			  station.getAvailableBikeStands()+" emplacements libres") //TODO intl
-	            		 	 .icon(getMarkerBlueBitmapDescriptor());
+	            		 	 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
 		    }else{
 		    	markerOptions.snippet("Station fermée") //TODO intl
   		 			  		 .icon(getMarkerRedBitmapDescriptor());
