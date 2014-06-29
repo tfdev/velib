@@ -8,8 +8,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class Station {
 	
+	//----------------- Class Fields ------------------
+	
 	private static final String TAG = Station.class.getName();
 
+	//----------------- Instance Fields ------------------
+	
 	private int number;
 	private String name;
 	private String address;
@@ -22,6 +26,7 @@ public class Station {
 	private int availableBikes;
 	private Date lastUpDate;
 	
+	//----------------- Instance Methods ------------------
 	
 	public Station() {
 		super();
@@ -103,6 +108,14 @@ public class Station {
 	}
 	public void setLastUpDate(Date lastUpDate) {
 		this.lastUpDate = lastUpDate;
+	}
+	
+	public String getFormattedName() {
+		String formattedName = "";
+		if(name != null){
+			formattedName = name.substring(name.indexOf('-')+1);
+		}
+		return formattedName;
 	}
 	
 }

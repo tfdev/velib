@@ -1,6 +1,5 @@
 package trouve.mon.velib;
 
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -14,7 +13,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,16 +26,22 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
 
-public class MainActivity extends Activity implements 	ConnectionCallbacks,
+public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnConnectionFailedListener,
-														LocationListener{
+														LocationListener,
+														OnMyLocationButtonClickListener{
 	
-	private static final String TAG = MainActivity.class.getName();
+	//----------------- Static Fields ------------------
+	
+	//private static final String TAG = MainActivity.class.getName();
 	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
 	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
+		
+	//----------------- Static Methods ------------------
 	
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -42,10 +50,15 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     
-    private GoogleMap mMap;
-    private LocationClient mLocationClient;
+    //-----------------  Instance Fields ------------------
     
+    private GoogleMap map;
+    private LocationClient locationClient;	
+	private BitmapDescriptor markerBlueDescriptor;
+	private BitmapDescriptor markerRedDescriptor ;
 
+	//-----------------  Instance Methods ------------------
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,43 +71,70 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
         super.onResume();
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
-        mLocationClient.connect();
+        locationClient.connect();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mLocationClient != null) {
-            mLocationClient.disconnect();
+        if (locationClient != null) {
+            locationClient.disconnect();
         }
     }
     
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
+        if (map == null) {
             // Try to obtain the map from the MapFragment.
-            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
+            map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                mMap.setMyLocationEnabled(true);
-                mMap.setOnMyLocationButtonClickListener(new OnMyLocationButtonClickListener(){
-
-					public boolean onMyLocationButtonClick() {
-						centerMapOnMyLocation();
-						return true;
-					}
-                	
-                });
+            if (map != null) {
+                map.setMyLocationEnabled(true);
+                map.setOnMyLocationButtonClickListener(this);
+                map.getUiSettings().setZoomControlsEnabled(false);
                 updateMap();
             }
         }
     }
     
+    public BitmapDescriptor getMarkerBlueBitmapDescriptor(){
+		if(markerBlueDescriptor == null){
+			markerBlueDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerblue);
+		}
+		return markerBlueDescriptor;
+	}
+	
+	public BitmapDescriptor getMarkerRedBitmapDescriptor(){
+		if(markerRedDescriptor == null){
+			markerRedDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerred);
+		}
+		return markerRedDescriptor;
+	}
+    
+    public void addMarkers() {
+    	
+    	SparseArray<Station> stationMap = StationManager.INSTANCE.getStationMap();
+		for(int i = 0, nsize = stationMap.size(); i < nsize; i++) {
+		    Station station = stationMap.valueAt(i);
+		    MarkerOptions markerOptions = new MarkerOptions()
+									            .position(station.getPosition())
+									            .title(station.getFormattedName());
+									            
+		    if(station.getStatus() == Status.OPEN){
+		    	markerOptions.snippet(station.getAvailableBikes()+" vŽlos libres - "+ //TODO intl
+	            		 			  station.getAvailableBikeStands()+" emplacements libres") //TODO intl
+	            		 	 .icon(getMarkerBlueBitmapDescriptor());
+		    }else{
+		    	markerOptions.snippet("Station fermŽe") //TODO intl
+  		 			  		 .icon(getMarkerRedBitmapDescriptor());
+		    }
+		    map.addMarker(markerOptions);
+		}
+	}
     
     private void setUpLocationClientIfNeeded() {
-        if (mLocationClient == null) {
-            mLocationClient = new LocationClient(
+        if (locationClient == null) {
+            locationClient = new LocationClient(
                     getApplicationContext(),
                     this,  // ConnectionCallbacks
                     this); // OnConnectionFailedListener    
@@ -102,35 +142,38 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
     }
 
     private void centerMapOnMyLocation(){
-    	if(mLocationClient != null){
-    		Location lastLocation = mLocationClient.getLastLocation();
+    	if(locationClient != null){
+    		Location lastLocation = locationClient.getLastLocation();
     		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-    		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
     	}
     }
     
+    @Override
+    public boolean onMyLocationButtonClick() {
+		centerMapOnMyLocation();
+		return true;
+	}
     
 	@Override
 	public void onLocationChanged(Location location) {
-		
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		mLocationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
+		locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
 		centerMapOnMyLocation();
 	}
 
 	@Override
 	public void onDisconnected() {
-		// Do nothing
+		// TODO Auto-generated method stub	
 	}
 	
 	private void updateMap(){
@@ -139,16 +182,18 @@ public class MainActivity extends Activity implements 	ConnectionCallbacks,
 		if (networkInfo != null && networkInfo.isConnected()) {
             new DownloadTask().execute(URL_STATION, API_KEY);
 		} else {
-			Toast.makeText(this, "Internet connection disabled", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
 		}
 	}
+	
+	//----------------- Nested Class ------------------
 	
 	private class DownloadTask extends AsyncTask<String, Void, Boolean> {
 		String TAG = DownloadTask.class.getName();
 		
 	    protected void onPostExecute(Boolean done) {
 	    	if(done){
-	    		StationManager.addMarkers(mMap);
+	    		addMarkers();
 	    	}
 	    }
 

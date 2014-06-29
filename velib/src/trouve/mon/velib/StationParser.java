@@ -34,7 +34,9 @@ import android.util.Log;
  */
 
 
-public class StationParser {
+public abstract class StationParser {
+	
+	//----------------- Static Fields ------------------
 	
 	private static final String TAG = StationParser.class.getName();
 
@@ -52,7 +54,7 @@ public class StationParser {
 	public static String ATTRIBUTE_AVAILABLE_BIKE 			= "available_bikes";
 	public static String ATTRIBUTE_LAST_UPDATE 				= "last_update";
 	
-
+	//----------------- Static Methods ------------------
 	
 	public static void parse(InputStream inputStream) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
