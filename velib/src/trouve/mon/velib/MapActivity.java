@@ -11,12 +11,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.MarkerManager;
 import com.google.maps.android.ui.IconGenerator;
 
 import android.R.integer;
@@ -43,7 +48,8 @@ import android.widget.Toast;
 public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnConnectionFailedListener,
 														LocationListener,
-														OnMyLocationButtonClickListener{
+														OnMyLocationButtonClickListener, 
+														OnCameraChangeListener{
 	
 	//----------------- Static Fields ------------------
 	
@@ -64,8 +70,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     private GoogleMap map;
     private LocationClient locationClient;	
-	private BitmapDescriptor markerBlueDescriptor;
-	private BitmapDescriptor markerRedDescriptor ;
+	private Bitmap bitmap;
+	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
+	
 
 	//-----------------  Instance Methods ------------------
 	
@@ -102,23 +109,18 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
                 map.setMyLocationEnabled(true);
                 map.setOnMyLocationButtonClickListener(this);
                 map.getUiSettings().setZoomControlsEnabled(false);
+                map.setOnCameraChangeListener(this);
                 updateMap();
             }
         }
     }
+
     
-    private BitmapDescriptor getMarkerBlueBitmapDescriptor(){
-		if(markerBlueDescriptor == null){
-			markerBlueDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerblue);
+	private Bitmap getBitmap() {
+		if(bitmap == null){
+			bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, null);
 		}
-		return markerBlueDescriptor;
-	}
-	
-	private BitmapDescriptor getMarkerRedBitmapDescriptor(){
-		if(markerRedDescriptor == null){
-			markerRedDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.markerred);
-		}
-		return markerRedDescriptor;
+		return bitmap;
 	}
 	
 	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
@@ -126,46 +128,72 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 //		generator.setContentView(getLayoutInflater().inflate(R.layout.marker, null));
 //		return BitmapDescriptorFactory.fromBitmap(generator.makeIcon(""+bikes));
 		
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inMutable = true;
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, options);
+		Bitmap bitmap = getBitmap().copy(Bitmap.Config.ARGB_8888, true);
 		Canvas canvas = new Canvas(bitmap);
 		
 		Paint textPaint = new Paint();
-		textPaint.setColor(Color.argb(200, 0, 102, 204));
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(22);
 		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		textPaint.setStyle(Style.FILL_AND_STROKE);
 		
+		textPaint.setColor(Color.argb(200, 0, 102, 204)); //TODO const
 		canvas.drawText(""+bikes, bitmap.getWidth()/2, bitmap.getHeight()/2 - 22, textPaint);
 		
-		textPaint.setColor(Color.argb(200, 204, 204, 0));
-		
+		textPaint.setColor(Color.argb(200, 204, 204, 0)); //TODO const
 		canvas.drawText(""+stands, bitmap.getWidth()/2, bitmap.getHeight()/2, textPaint);
 
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
     
-    public void addMarkers() {
-    	
-    	SparseArray<Station> stationMap = StationManager.INSTANCE.getStationMap();
-		for(int i = 0, nsize = stationMap.size(); i < nsize; i++) {
-		    Station station = stationMap.valueAt(i);
-		    MarkerOptions markerOptions = new MarkerOptions()
-									            .position(station.getPosition())
-									            .title(station.getFormattedName());
-									            
-		    if(station.getStatus() == Status.OPEN){
-		    	markerOptions.snippet(station.getAvailableBikes()+" vŽlos libres - "+ //TODO intl
-	            		 			  station.getAvailableBikeStands()+" emplacements libres") //TODO intl
-	            		 	 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
-		    }else{
-		    	markerOptions.snippet("Station fermŽe") //TODO intl
-  		 			  		 .icon(getMarkerRedBitmapDescriptor());
-		    }
-		    map.addMarker(markerOptions);
+	public void refreshMarkers() {
+		if(this.map != null){		
+			if(map.getCameraPosition().zoom < 14.0f){ //TODO const
+				resetMarkers();
+				return;
+			}
+			
+	        LatLngBounds bounds = this.map.getProjection().getVisibleRegion().latLngBounds;
+	    	SparseArray<Station> stationMap = StationManager.INSTANCE.getStationMap();
+			for(int i = 0, nsize = stationMap.size(); i < nsize; i++) {
+			    Station station = stationMap.valueAt(i);
+	            if(bounds.contains(station.getPosition())){
+	                if(visibleMarkers.get(station.getNumber()) == null){
+	                	visibleMarkers.put(station.getNumber(), addMarker(station));
+	                }
+	            }
+	            else{
+	            	if(visibleMarkers.get(station.getNumber()) != null){
+	            		visibleMarkers.get(station.getNumber()).remove();
+	            		visibleMarkers.remove(station.getNumber());
+	                }
+	            }
+	        }
+	    }
+	}
+	
+	
+    private void resetMarkers() {
+		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
+			visibleMarkers.valueAt(i).remove();
 		}
+		visibleMarkers.clear();
+	}
+
+	public Marker addMarker(Station station) {
+    	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
+									            		.title(station.getFormattedName());
+									            
+    	if(station.getStatus() == Status.OPEN){
+    		markerOptions.snippet(station.getAvailableBikes()+" vŽlos libres - "+ //TODO intl
+	            		 		station.getAvailableBikeStands()+" emplacements libres") //TODO intl
+	            		 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
+    	}
+    	else{
+		    markerOptions.snippet("Station fermŽe") //TODO intl
+  		 		  		 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+    	}
+		return map.addMarker(markerOptions);
 	}
     
     private void setUpLocationClientIfNeeded() {
@@ -181,7 +209,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f)); //TODO const
     	}
     }
     
@@ -190,23 +218,23 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		centerMapOnMyLocation();
 		return true;
 	}
-    
+	@Override
+	public void onCameraChange(CameraPosition position) {
+		refreshMarkers();
+	}
 	@Override
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub	
 	}
-
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		// TODO Auto-generated method stub
 	}
-
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
 		centerMapOnMyLocation();
 	}
-
 	@Override
 	public void onDisconnected() {
 		// TODO Auto-generated method stub	
@@ -229,7 +257,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		
 	    protected void onPostExecute(Boolean done) {
 	    	if(done){
-	    		addMarkers();
+	    		refreshMarkers();
 	    	}
 	    }
 
@@ -245,7 +273,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		        connection.connect();
 		        int response = connection.getResponseCode();
 		        Log.d(TAG, "The response is: " + response);
-		        StationManager.update(connection.getInputStream());
+		        StationParser.parse(connection.getInputStream());
 			} catch (Exception e) {
 				Log.e(TAG, "Exception while downloading info", e);
 				return false;

@@ -1,9 +1,5 @@
 package trouve.mon.velib;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.util.Log;
 import android.util.SparseArray;
 
 
@@ -18,14 +14,6 @@ public class StationManager {
 	private static final int STATION_COUNT = 1800;
 	
 	//----------------- Static Methods ------------------
-	
-	public static void update(InputStream inputStream){
-		try {
-			StationParser.parse(inputStream);
-		} catch (IOException e) {
-			Log.e(TAG, "Exception while parsing", e);
-		}
-	}
 	
 	//----------------- Instance Fields ------------------
 	
