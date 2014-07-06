@@ -208,8 +208,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private void centerMapOnMyLocation(){
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
-    		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f)); //TODO const
+    		if(lastLocation != null){
+        		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f)); //TODO const
+    		}
     	}
     }
     
