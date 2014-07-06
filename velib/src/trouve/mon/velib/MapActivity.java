@@ -2,6 +2,10 @@ package trouve.mon.velib;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -34,7 +38,6 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -49,9 +52,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	//----------------- Static Fields ------------------
 	
-	//private static final String TAG = MainActivity.class.getName();
+	private static final String TAG = MapActivity.class.getName();
 	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
 	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
+	private static final long REFRESH_PERIOD = 30; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
@@ -64,6 +68,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private LocationClient locationClient;	
 	private Bitmap bitmap;
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
+	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	@SuppressWarnings("rawtypes")
+	private ScheduledFuture scheduledRefresh;
+
 	
 	
 	//-----------------  Activity Lifecycle ------------------
@@ -81,17 +90,23 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         locationClient.connect();
+        updateData();
     }
 
-    @Override
+	@Override
     public void onPause() {
         super.onPause();
         if (locationClient != null) {
             locationClient.disconnect();
         }
+        if(scheduledRefresh != null){
+        	scheduledRefresh.cancel(true);
+        }
     }
     
 	//-----------------  Instance Methods ------------------
+    
+
     
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -104,7 +119,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
                 map.setOnMyLocationButtonClickListener(this);
                 map.getUiSettings().setZoomControlsEnabled(false);
                 map.setOnCameraChangeListener(this);
-                updateMap();
             }
         }
     }
@@ -136,7 +150,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
     
-	private void refreshMarkers() {
+	private void refreshMarkers(boolean forceRefresh) {
+
 		if(this.map != null){		
 			if(map.getCameraPosition().zoom < 14.0f){ //TODO const
 				resetMarkers();
@@ -149,6 +164,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			    Station station = stationMap.valueAt(i);
 	            if(bounds.contains(station.getPosition())){
 	                if(visibleMarkers.get(station.getNumber()) == null){
+	                	visibleMarkers.put(station.getNumber(), addMarker(station));
+	                }else if(forceRefresh){
+	                	visibleMarkers.get(station.getNumber()).remove();
 	                	visibleMarkers.put(station.getNumber(), addMarker(station));
 	                }
 	            }
@@ -207,15 +225,64 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	}
     }
     
-	private void updateMap(){
+	private void updateData(){
 		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-		if (networkInfo != null && networkInfo.isConnected()) {
-            new DownloadTask().execute(URL_STATION, API_KEY);
-		} 
-		else {
+		if (networkInfo == null || !networkInfo.isConnected()) {
 			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
-		}
+		} 
+		
+		scheduledRefresh = scheduler.scheduleAtFixedRate(getRefreshRunnable(), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+	}
+	
+	private Runnable getRefreshRunnable() {
+		return new Runnable() {
+			public void run() {
+				HttpURLConnection connection = null;
+				try {
+					URL url = new URL(URL_STATION+API_KEY);
+			        connection = (HttpURLConnection) url.openConnection();
+			        connection.setReadTimeout(10000 /* milliseconds */);
+			        connection.setConnectTimeout(15000 /* milliseconds */);
+			        connection.setRequestMethod("GET");
+			        connection.setDoInput(true);
+			        connection.connect();
+			        if(connection.getResponseCode() == 200){
+			        	StationParser.parse(connection.getInputStream());
+				        runOnUiThread(new Runnable() {
+							public void run() {
+								refreshMarkers(true);
+								showMessage("DonnŽes mises ˆ jour");
+							}
+						});
+			        }
+			        else{
+			        	runOnUiThread(new Runnable() {
+							public void run() {
+								showMessage("Service indisponible"); // TODO intl
+							}
+						});
+			        }
+				}
+				catch (Exception e) {
+					Log.e(TAG, "Exception while downloading info", e);
+					runOnUiThread(new Runnable() {
+						public void run() {
+							showMessage("VŽrifiez votre connexion internet"); // TODO intl
+						}
+					});
+				}
+				finally{
+					if(connection != null){
+						connection.disconnect();
+					}
+				}
+			}
+		};
+	}
+
+	private void showMessage(String msg) {
+		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
 	
 	//----------------- Interface Implementation ------------------
@@ -227,7 +294,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	@Override
 	public void onCameraChange(CameraPosition position) {
-		refreshMarkers();
+		refreshMarkers(false);
 	}
 	@Override
 	public void onLocationChanged(Location location) {
@@ -247,37 +314,5 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		// TODO Auto-generated method stub	
 	}
 
-	
-	//----------------- Nested Class ------------------
-	
-	private class DownloadTask extends AsyncTask<String, Void, Boolean> {
-		String TAG = DownloadTask.class.getName();
-		
-	    protected void onPostExecute(Boolean done) {
-	    	if(done){
-	    		refreshMarkers();
-	    	}
-	    }
-
-		protected Boolean doInBackground(String... param) {
-
-			try {
-				URL url = new URL(param[0]+param[1]);
-		        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		        connection.setReadTimeout(10000 /* milliseconds */);
-		        connection.setConnectTimeout(15000 /* milliseconds */);
-		        connection.setRequestMethod("GET");
-		        connection.setDoInput(true);
-		        connection.connect();
-		        int response = connection.getResponseCode();
-		        Log.d(TAG, "The response is: " + response);
-		        StationParser.parse(connection.getInputStream());
-			} catch (Exception e) {
-				Log.e(TAG, "Exception while downloading info", e);
-				return false;
-			}
-			return true;
-		}
-	 }
 
 }
