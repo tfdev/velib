@@ -21,10 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.MarkerManager;
-import com.google.maps.android.ui.IconGenerator;
 
-import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -41,7 +38,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
 import android.widget.Toast;
 
 
@@ -56,11 +52,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	//private static final String TAG = MainActivity.class.getName();
 	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
 	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
-		
-	//----------------- Static Methods ------------------
 	
-    // These settings are the same as the settings for the map. They will in fact give you updates
-    // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
@@ -73,8 +65,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private Bitmap bitmap;
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
 	
-
-	//-----------------  Instance Methods ------------------
+	
+	//-----------------  Activity Lifecycle ------------------
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +91,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
     
+	//-----------------  Instance Methods ------------------
+    
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
@@ -114,8 +108,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
             }
         }
     }
-
-    
+  
 	private Bitmap getBitmap() {
 		if(bitmap == null){
 			bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, null);
@@ -124,9 +117,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
-//		IconGenerator generator = new IconGenerator(this);
-//		generator.setContentView(getLayoutInflater().inflate(R.layout.marker, null));
-//		return BitmapDescriptorFactory.fromBitmap(generator.makeIcon(""+bikes));
 		
 		Bitmap bitmap = getBitmap().copy(Bitmap.Config.ARGB_8888, true);
 		Canvas canvas = new Canvas(bitmap);
@@ -146,7 +136,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
     
-	public void refreshMarkers() {
+	private void refreshMarkers() {
 		if(this.map != null){		
 			if(map.getCameraPosition().zoom < 14.0f){ //TODO const
 				resetMarkers();
@@ -170,8 +160,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	            }
 	        }
 	    }
-	}
-	
+	}	
 	
     private void resetMarkers() {
 		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
@@ -180,7 +169,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		visibleMarkers.clear();
 	}
 
-	public Marker addMarker(Station station) {
+    private Marker addMarker(Station station) {
     	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
 									            		.title(station.getFormattedName());
 									            
@@ -212,8 +201,24 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
         		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f)); //TODO const
     		}
+    		else {
+    			Toast.makeText(this, "En attente d'informations de localisation...", Toast.LENGTH_LONG).show(); //TODO intl
+    		}
     	}
     }
+    
+	private void updateMap(){
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) {
+            new DownloadTask().execute(URL_STATION, API_KEY);
+		} 
+		else {
+			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
+		}
+	}
+	
+	//----------------- Interface Implementation ------------------
     
     @Override
     public boolean onMyLocationButtonClick() {
@@ -241,16 +246,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	public void onDisconnected() {
 		// TODO Auto-generated method stub	
 	}
-	
-	private void updateMap(){
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-		if (networkInfo != null && networkInfo.isConnected()) {
-            new DownloadTask().execute(URL_STATION, API_KEY);
-		} else {
-			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
-		}
-	}
+
 	
 	//----------------- Nested Class ------------------
 	

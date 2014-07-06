@@ -29,10 +29,7 @@ public class Station {
 	//----------------- Instance Methods ------------------
 	
 	public Station() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
-	
 	
 	public int getNumber() {
 		return number;

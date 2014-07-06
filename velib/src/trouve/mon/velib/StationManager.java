@@ -7,7 +7,7 @@ public class StationManager {
 	
 	//----------------- Static Fields ------------------
 	
-	private static final String TAG = StationManager.class.getName();
+	//private static final String TAG = StationManager.class.getName();
 	
 	public static StationManager INSTANCE = new StationManager();
 	
