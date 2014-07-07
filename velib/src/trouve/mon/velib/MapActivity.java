@@ -72,7 +72,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     private GoogleMap map;
     private LocationClient locationClient;	
-	private Bitmap bitmap;
 	private View refreshButton;
 	private Animation refreshButtonAnimation;
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
@@ -82,7 +81,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@SuppressWarnings("rawtypes")
 	private ScheduledFuture scheduledRefresh;
 
-	
+	private Bitmap markerBlue;
+	private Bitmap markerBlack;
+	private Bitmap markerGreen;
+	private Bitmap markerOrange;
+	private Bitmap markerRed;
 	
 	//-----------------  Activity Lifecycle ------------------
 	
@@ -124,6 +127,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		refreshButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if(!refreshing){
+					refreshing = true;
 					scheduleUpdateData();
 				}
 			}
@@ -162,18 +166,48 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
   
-	private Bitmap getBitmap() {
-		if(bitmap == null){
-			bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, null);
+	private Bitmap getMarkerBlue() {
+		if(markerBlue == null){
+			markerBlue = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, null);
 		}
-		return bitmap;
+		return markerBlue;
+	}
+	private Bitmap getMarkerGreen() {
+		if(markerGreen == null){
+			markerGreen = BitmapFactory.decodeResource(getResources(), R.drawable.markergreen, null);
+		}
+		return markerGreen;
+	}
+	private Bitmap getMarkerBlack() {
+		if(markerBlack == null){
+			markerBlack = BitmapFactory.decodeResource(getResources(), R.drawable.markerblack, null);
+		}
+		return markerBlack;
+	}
+	private Bitmap getMarkerOrange() {
+		if(markerOrange == null){
+			markerOrange = BitmapFactory.decodeResource(getResources(), R.drawable.markerorange, null);
+		}
+		return markerOrange;
+	}
+	private Bitmap getMarkerRed() {
+		if(markerRed == null){
+			markerRed = BitmapFactory.decodeResource(getResources(), R.drawable.markerred, null);
+		}
+		return markerRed;
 	}
 	
 	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
-		
-		Bitmap bitmap = getBitmap().copy(Bitmap.Config.ARGB_8888, true);
-		Canvas canvas = new Canvas(bitmap);
-		
+		Bitmap bitmap = null;
+		if(bikes == 0 || stands == 0){
+			bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
+		}else if (bikes <= 3 || stands <= 3){
+			bitmap = getMarkerOrange().copy(Bitmap.Config.ARGB_8888, true);
+		}else{
+			bitmap = getMarkerGreen().copy(Bitmap.Config.ARGB_8888, true);
+		}
+
+		Canvas canvas = new Canvas(bitmap);		
 		Paint textPaint = new Paint();
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(22);
@@ -231,12 +265,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 									            		.title(station.getFormattedName());
 									            
     	if(station.getStatus() == Status.OPEN){
-    		markerOptions.snippet(station.getAvailableBikes()+" vÃ©los libres - "+ //TODO intl
+    		markerOptions.snippet(station.getAvailableBikes()+" vŽlos libres - "+ //TODO intl
 	            		 		station.getAvailableBikeStands()+" emplacements libres") //TODO intl
 	            		 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
     	}
     	else{
-		    markerOptions.snippet("Station fermÃ©e") //TODO intl
+		    markerOptions.snippet("Station fermŽe") //TODO intl
   		 		  		 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
     	}
 		return map.addMarker(markerOptions);
@@ -306,7 +340,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 				        runOnUiThread(new Runnable() {
 							public void run() {
 								refreshMarkers(true);
-								showMessage("DonnÃ©es mises Ã  jour"); // TODO intl
+								showMessage("DonnŽes mises ˆ jour"); // TODO intl
 							}
 						});
 			        }
@@ -322,7 +356,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 					Log.e(TAG, "Exception while downloading info", e);
 					runOnUiThread(new Runnable() {
 						public void run() {
-							showMessage("VÃ©rifiez votre connexion internet"); // TODO intl
+							showMessage("VŽrifiez votre connexion internet"); // TODO intl
 						}
 					});
 				}
