@@ -192,12 +192,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 									            		.title(station.getFormattedName());
 									            
     	if(station.getStatus() == Status.OPEN){
-    		markerOptions.snippet(station.getAvailableBikes()+" vélos libres - "+ //TODO intl
+    		markerOptions.snippet(station.getAvailableBikes()+" v√©los libres - "+ //TODO intl
 	            		 		station.getAvailableBikeStands()+" emplacements libres") //TODO intl
 	            		 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
     	}
     	else{
-		    markerOptions.snippet("Station fermée") //TODO intl
+		    markerOptions.snippet("Station ferm√©e") //TODO intl
   		 		  		 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
     	}
 		return map.addMarker(markerOptions);
@@ -252,7 +252,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 				        runOnUiThread(new Runnable() {
 							public void run() {
 								refreshMarkers(true);
-								showMessage("Données mises à jour");
+								showMessage("Donn√©es mises √† jour");
 							}
 						});
 			        }
@@ -268,7 +268,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 					Log.e(TAG, "Exception while downloading info", e);
 					runOnUiThread(new Runnable() {
 						public void run() {
-							showMessage("Vérifiez votre connexion internet"); // TODO intl
+							showMessage("V√©rifiez votre connexion internet"); // TODO intl
 						}
 					});
 				}
