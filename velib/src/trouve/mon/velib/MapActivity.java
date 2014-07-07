@@ -36,11 +36,16 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
@@ -52,10 +57,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	//----------------- Static Fields ------------------
 	
+	private static final float CENTER_ZOOM_LEVEL = 15.0f;
 	private static final String TAG = MapActivity.class.getName();
 	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
 	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
-	private static final long REFRESH_PERIOD = 30; //SECONDS
+	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
@@ -67,7 +73,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private GoogleMap map;
     private LocationClient locationClient;	
 	private Bitmap bitmap;
+	private View refreshButton;
+	private Animation refreshButtonAnimation;
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
+	private boolean refreshing = false;
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	@SuppressWarnings("rawtypes")
@@ -81,7 +90,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		horribleHackToMoveMyLocationButton();
+		setUpRefreshButton();
 	}
 	
     @Override
@@ -90,7 +100,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         locationClient.connect();
-        updateData();
+        scheduleUpdateData();
     }
 
 	@Override
@@ -106,8 +116,37 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
 	//-----------------  Instance Methods ------------------
     
-
-    
+	private void setUpRefreshButton(){
+		refreshButton = findViewById(R.id.btn_refresh);
+		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
+		refreshButtonAnimation.setRepeatCount(Animation.INFINITE);
+		
+		refreshButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if(!refreshing){
+					scheduleUpdateData();
+				}
+			}
+		});
+	}
+	
+	private void horribleHackToMoveMyLocationButton() {
+	    View mapView = findViewById(R.id.map);
+	    try{
+		    // Get the button view 
+		    View locationButton = ((View) mapView.findViewById(1).getParent()).findViewById(2);
+		    // and next place it, for example, on bottom right (as Google Maps app)
+		    RelativeLayout.LayoutParams relativeLayoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+		    // position on right bottom
+		    relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+		    relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+		    relativeLayoutParams.setMargins(0, 0, 30, 30);
+	    }
+	    catch(Exception e){
+	    	Log.e(TAG, "not able to move myLocation button", e);
+	    }
+	}
+	
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
@@ -205,19 +244,25 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     private void setUpLocationClientIfNeeded() {
         if (locationClient == null) {
-            locationClient = new LocationClient(
-                    getApplicationContext(),
-                    this,  // ConnectionCallbacks
-                    this); // OnConnectionFailedListener    
+            locationClient = new LocationClient(getApplicationContext(), this,  // ConnectionCallbacks
+                    													 this); // OnConnectionFailedListener    
         }
     }
 
+    private boolean isGpsEnabled(){
+    	 final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    	 return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+    
     private void centerMapOnMyLocation(){
-    	if(locationClient != null){
+    	if(!isGpsEnabled()){
+    		showMessage("Activez le GPS"); //TODO intl
+    	}
+    	else if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f)); //TODO const
+        		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
     		else {
     			Toast.makeText(this, "En attente d'informations de localisation...", Toast.LENGTH_LONG).show(); //TODO intl
@@ -225,20 +270,29 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	}
     }
     
-	private void updateData(){
+	private void scheduleUpdateData(){
+		
 		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 		if (networkInfo == null || !networkInfo.isConnected()) {
 			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
 		} 
-		
-		scheduledRefresh = scheduler.scheduleAtFixedRate(getRefreshRunnable(), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+		if(scheduledRefresh != null){
+        	scheduledRefresh.cancel(true);
+        }
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(getRefreshRunnable(), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
 	private Runnable getRefreshRunnable() {
 		return new Runnable() {
 			public void run() {
 				HttpURLConnection connection = null;
+				runOnUiThread(new Runnable() {
+					public void run() {
+						refreshing = true;
+						refreshButton.startAnimation(refreshButtonAnimation);
+					}
+				});
 				try {
 					URL url = new URL(URL_STATION+API_KEY);
 			        connection = (HttpURLConnection) url.openConnection();
@@ -252,7 +306,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 				        runOnUiThread(new Runnable() {
 							public void run() {
 								refreshMarkers(true);
-								showMessage("Données mises à jour");
+								showMessage("Données mises à jour"); // TODO intl
 							}
 						});
 			        }
@@ -276,6 +330,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 					if(connection != null){
 						connection.disconnect();
 					}
+					runOnUiThread(new Runnable() {
+						public void run() {
+							refreshing = false;
+							refreshButton.clearAnimation();
+						}
+					});
 				}
 			}
 		};
