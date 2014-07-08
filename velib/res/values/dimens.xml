@@ -3,5 +3,9 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-
+    <dimen name="text_size">13sp</dimen>
+    <dimen name="center_bike">11dip</dimen>
+    <dimen name="center_closed">4dip</dimen>
+	<dimen name="center_stand">1dip</dimen>
+	
 </resources>

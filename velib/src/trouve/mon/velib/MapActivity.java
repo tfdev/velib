@@ -33,7 +33,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
@@ -56,6 +55,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnCameraChangeListener{
 	
 	//----------------- Static Fields ------------------
+	
+	private static final int RED = Color.rgb(181, 12, 22);
+	private static final int ORANGE = Color.rgb(215, 119, 34);
+	private static final int GREEN = Color.rgb(133, 161, 82);
 	
 	private static final float CENTER_ZOOM_LEVEL = 15.0f;
 	private static final String TAG = MapActivity.class.getName();
@@ -81,8 +84,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@SuppressWarnings("rawtypes")
 	private ScheduledFuture scheduledRefresh;
 
-	private Bitmap markerBlue;
-	private Bitmap markerBlack;
 	private Bitmap markerGreen;
 	private Bitmap markerOrange;
 	private Bitmap markerRed;
@@ -165,24 +166,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
             }
         }
     }
-  
-	private Bitmap getMarkerBlue() {
-		if(markerBlue == null){
-			markerBlue = BitmapFactory.decodeResource(getResources(), R.drawable.markerblue, null);
-		}
-		return markerBlue;
-	}
+
 	private Bitmap getMarkerGreen() {
 		if(markerGreen == null){
 			markerGreen = BitmapFactory.decodeResource(getResources(), R.drawable.markergreen, null);
 		}
 		return markerGreen;
-	}
-	private Bitmap getMarkerBlack() {
-		if(markerBlack == null){
-			markerBlack = BitmapFactory.decodeResource(getResources(), R.drawable.markerblack, null);
-		}
-		return markerBlack;
 	}
 	private Bitmap getMarkerOrange() {
 		if(markerOrange == null){
@@ -196,29 +185,55 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		}
 		return markerRed;
 	}
-	
+	private int getCenterClosed(){
+		return getResources().getDimensionPixelSize(R.dimen.center_closed);
+	}
+	private int getTextSize(){
+		return getResources().getDimensionPixelSize(R.dimen.text_size);
+	}
+	private int getCenterStand(){
+		return getResources().getDimensionPixelSize(R.dimen.center_stand);
+	}
+	private int getCenterBike(){
+		return getResources().getDimensionPixelSize(R.dimen.center_bike);
+	}
+	private BitmapDescriptor getClosedStationMarkerBitmapDescriptor() { // TODO refactor
+		int color = RED;
+		Bitmap bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
+
+		Canvas canvas = new Canvas(bitmap);		
+		Paint textPaint = new Paint();
+		textPaint.setTextAlign(Paint.Align.CENTER);
+		textPaint.setTextSize(getTextSize());
+		textPaint.setTypeface(Typeface.MONOSPACE);
+		textPaint.setColor(color);
+		canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
+
+		return BitmapDescriptorFactory.fromBitmap(bitmap);
+	}
 	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
+
+		int color;
 		Bitmap bitmap = null;
 		if(bikes == 0 || stands == 0){
 			bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
+			color = RED;
 		}else if (bikes <= 3 || stands <= 3){
 			bitmap = getMarkerOrange().copy(Bitmap.Config.ARGB_8888, true);
+			color = ORANGE;
 		}else{
 			bitmap = getMarkerGreen().copy(Bitmap.Config.ARGB_8888, true);
+			color = GREEN;
 		}
 
 		Canvas canvas = new Canvas(bitmap);		
 		Paint textPaint = new Paint();
 		textPaint.setTextAlign(Paint.Align.CENTER);
-		textPaint.setTextSize(22);
-		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		textPaint.setStyle(Style.FILL_AND_STROKE);
-		
-		textPaint.setColor(Color.argb(200, 0, 102, 204)); //TODO const
-		canvas.drawText(""+bikes, bitmap.getWidth()/2, bitmap.getHeight()/2 - 22, textPaint);
-		
-		textPaint.setColor(Color.argb(200, 204, 204, 0)); //TODO const
-		canvas.drawText(""+stands, bitmap.getWidth()/2, bitmap.getHeight()/2, textPaint);
+		textPaint.setTextSize(getTextSize());
+		textPaint.setTypeface(Typeface.MONOSPACE);
+		textPaint.setColor(color);
+		canvas.drawText(String.valueOf(bikes), bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterBike(), textPaint);
+		canvas.drawText(String.valueOf(stands), bitmap.getWidth()/2, bitmap.getHeight()/2 + getCenterStand(), textPaint);
 
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
@@ -265,13 +280,13 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 									            		.title(station.getFormattedName());
 									            
     	if(station.getStatus() == Status.OPEN){
-    		markerOptions.snippet(station.getAvailableBikes()+" vŽlos libres - "+ //TODO intl
-	            		 		station.getAvailableBikeStands()+" emplacements libres") //TODO intl
+    		markerOptions.snippet(station.getAvailableBikes()+" vÃ©los - "+ //TODO intl
+	            		 		station.getAvailableBikeStands()+" emplacements") //TODO intl
 	            		 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
     	}
     	else{
-		    markerOptions.snippet("Station fermŽe") //TODO intl
-  		 		  		 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+		    markerOptions.snippet("Station fermÃ©e") //TODO intl
+  		 		  		 .icon(getClosedStationMarkerBitmapDescriptor());
     	}
 		return map.addMarker(markerOptions);
 	}
@@ -340,7 +355,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 				        runOnUiThread(new Runnable() {
 							public void run() {
 								refreshMarkers(true);
-								showMessage("DonnŽes mises ˆ jour"); // TODO intl
 							}
 						});
 			        }
@@ -356,7 +370,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 					Log.e(TAG, "Exception while downloading info", e);
 					runOnUiThread(new Runnable() {
 						public void run() {
-							showMessage("VŽrifiez votre connexion internet"); // TODO intl
+							showMessage("VÃ©rifiez votre connexion internet"); // TODO intl
 						}
 					});
 				}
