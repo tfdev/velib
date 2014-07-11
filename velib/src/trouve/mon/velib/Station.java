@@ -110,7 +110,7 @@ public class Station {
 	public String getFormattedName() {
 		String formattedName = "";
 		if(name != null){
-			formattedName = name.substring(name.indexOf('-')+1);
+			formattedName = name.substring(name.indexOf('-')+2);
 		}
 		return formattedName;
 	}

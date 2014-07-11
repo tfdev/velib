@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="40dp"
+    android:background="#E1EDFA" >
+
+    <ImageView
+        android:id="@+id/bike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:paddingLeft="2dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/blue_bike" />
+
+    <TextView
+        android:id="@+id/bike_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:layout_toRightOf="@id/bike"
+        android:text="20"/>
+
+
+
+    <TextView
+        android:id="@+id/parking_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="4dp"
+        android:layout_toLeftOf="@id/parking"
+        android:layout_centerInParent="true"
+        android:text="10"
+        android:textSize="30sp" />
+
+    <ImageView
+        android:id="@+id/parking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:paddingRight="8dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/parking" />
+    
+   	<TextView
+        android:id="@+id/station_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_toLeftOf="@id/parking_number"
+        android:layout_toRightOf="@id/bike_number"
+        android:ellipsize="marquee"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:scrollHorizontally="false"
+        android:text="Place du bataillon de la République démocratique du Congo"
+        android:textAlignment="center"
+        android:textSize="15sp" />
+
+</RelativeLayout>

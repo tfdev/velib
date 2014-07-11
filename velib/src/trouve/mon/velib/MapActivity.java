@@ -7,25 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
-import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -36,8 +17,6 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -45,25 +24,51 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnConnectionFailedListener,
 														LocationListener,
 														OnMyLocationButtonClickListener, 
-														OnCameraChangeListener{
+														OnCameraChangeListener, 
+														OnMarkerClickListener, 
+														OnMapClickListener{
 	
 	//----------------- Static Fields ------------------
+	
+	private static final String TAG = MapActivity.class.getName();
+	
+	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
+	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
 	
 	private static final int RED = Color.rgb(181, 12, 22);
 	private static final int ORANGE = Color.rgb(215, 119, 34);
 	private static final int GREEN = Color.rgb(133, 161, 82);
 	
 	private static final float CENTER_ZOOM_LEVEL = 15.0f;
-	private static final String TAG = MapActivity.class.getName();
-	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
-	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
 	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -88,6 +93,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private Bitmap markerOrange;
 	private Bitmap markerRed;
 	
+	// Station Details
+	private View detailContainerView;
+	private TextView bikeTextView;
+	private TextView standTextView;
+	private TextView stationTextView;
+	
 	//-----------------  Activity Lifecycle ------------------
 	
 	@Override
@@ -96,11 +107,13 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		setContentView(R.layout.activity_main);
 		horribleHackToMoveMyLocationButton();
 		setUpRefreshButton();
+		setUpStationDetailView();
 	}
 	
     @Override
     protected void onResume() {
         super.onResume();
+        setDetailViewVisible(false);
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         locationClient.connect();
@@ -135,6 +148,29 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		});
 	}
 	
+	private void setUpStationDetailView(){
+		detailContainerView = findViewById(R.id.detail_layout);
+		bikeTextView = (TextView) findViewById(R.id.bike_number);
+		standTextView = (TextView) findViewById(R.id.parking_number);
+		stationTextView = (TextView) findViewById(R.id.station_info);
+	}
+	
+	private void updateStationDetailView(Station station){	
+		bikeTextView.setText(String.valueOf(station.getAvailableBikes()));
+		standTextView.setText(String.valueOf(station.getAvailableBikeStands()));
+		stationTextView.setText(String.valueOf(station.getFormattedName()));
+	}
+	
+	private void setDetailViewVisible(boolean visible){
+		if(visible){
+			detailContainerView.setVisibility(View.VISIBLE);
+			// change refresh button top margin
+		}else{
+			detailContainerView.setVisibility(View.INVISIBLE);
+			// change refresh button top margin
+		}
+	}
+	
 	private void horribleHackToMoveMyLocationButton() {
 	    View mapView = findViewById(R.id.map);
 	    try{
@@ -163,6 +199,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
                 map.setOnMyLocationButtonClickListener(this);
                 map.getUiSettings().setZoomControlsEnabled(false);
                 map.setOnCameraChangeListener(this);
+                map.setOnMarkerClickListener(this);
+                map.setOnMapClickListener(this);
             }
         }
     }
@@ -198,7 +236,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		return getResources().getDimensionPixelSize(R.dimen.center_bike);
 	}
 	private BitmapDescriptor getClosedStationMarkerBitmapDescriptor() { // TODO refactor
-		int color = RED;
 		Bitmap bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
 
 		Canvas canvas = new Canvas(bitmap);		
@@ -206,7 +243,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(getTextSize());
 		textPaint.setTypeface(Typeface.MONOSPACE);
-		textPaint.setColor(color);
+		textPaint.setColor(RED);
 		canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
 
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
@@ -277,16 +314,13 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 
     private Marker addMarker(Station station) {
     	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
-									            		.title(station.getFormattedName());
+    													.title(String.valueOf(station.getNumber()));
 									            
     	if(station.getStatus() == Status.OPEN){
-    		markerOptions.snippet(station.getAvailableBikes()+" vélos - "+ //TODO intl
-	            		 		station.getAvailableBikeStands()+" emplacements") //TODO intl
-	            		 .icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
+    		markerOptions.icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
     	}
     	else{
-		    markerOptions.snippet("Station fermée") //TODO intl
-  		 		  		 .icon(getClosedStationMarkerBitmapDescriptor());
+		    markerOptions.icon(getClosedStationMarkerBitmapDescriptor());
     	}
 		return map.addMarker(markerOptions);
 	}
@@ -319,13 +353,19 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	}
     }
     
+	private void showMessage(String msg) {
+		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+	}
+    
+    //------------------- Handling Station Data --------------------- 
+    
 	private void scheduleUpdateData(){
 		
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		/*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 		if (networkInfo == null || !networkInfo.isConnected()) {
 			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
-		} 
+		} */
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
@@ -388,10 +428,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			}
 		};
 	}
-
-	private void showMessage(String msg) {
-		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-	}
+	
 	
 	//----------------- Interface Implementation ------------------
     
@@ -420,6 +457,21 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	public void onDisconnected() {
 		// TODO Auto-generated method stub	
+	}
+
+	@Override
+	public boolean onMarkerClick(Marker marker) {
+		int stationNumber = Integer.parseInt(marker.getTitle());
+		//TODO should listen to station changes
+		Station station = StationManager.INSTANCE.get(stationNumber);
+		updateStationDetailView(station);
+		setDetailViewVisible(true);
+		return true;
+	}
+
+	@Override
+	public void onMapClick(LatLng point) {
+		setDetailViewVisible(false);
 	}
 
 
