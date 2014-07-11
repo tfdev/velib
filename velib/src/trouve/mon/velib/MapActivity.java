@@ -23,6 +23,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
@@ -55,7 +57,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnMyLocationButtonClickListener, 
 														OnCameraChangeListener, 
 														OnMarkerClickListener, 
-														OnMapClickListener{
+														OnMapClickListener, 
+														OnMapLongClickListener{
 	
 	//----------------- Static Fields ------------------
 	
@@ -67,8 +70,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private static final int RED = Color.rgb(181, 12, 22);
 	private static final int ORANGE = Color.rgb(215, 119, 34);
 	private static final int GREEN = Color.rgb(133, 161, 82);
+	private static final float HIGHLIGHT_ALPHA = 0.5f;
+	private static final float NORMAL_ALPHA = 1.0f;
 	
-	private static final float CENTER_ZOOM_LEVEL = 15.0f;
+	private static final float CENTER_ZOOM_LEVEL = 15.5f;
+	private static final float MIN_ZOOM_LEVEL = 14.5f;
 	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -83,7 +89,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private View refreshButton;
 	private Animation refreshButtonAnimation;
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
+	
 	private boolean refreshing = false;
+	private boolean detailing = false;
+	private boolean centering = false;
+	
+	private int detailedStationNumber;
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	@SuppressWarnings("rawtypes")
@@ -98,6 +109,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private TextView bikeTextView;
 	private TextView standTextView;
 	private TextView stationTextView;
+	private ImageView bikeImageView;
+	private ImageView standImageView;
 	
 	//-----------------  Activity Lifecycle ------------------
 	
@@ -153,22 +166,82 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		bikeTextView = (TextView) findViewById(R.id.bike_number);
 		standTextView = (TextView) findViewById(R.id.parking_number);
 		stationTextView = (TextView) findViewById(R.id.station_info);
+		bikeImageView = (ImageView) findViewById(R.id.bike);
+		standImageView = (ImageView) findViewById(R.id.parking);
 	}
 	
-	private void updateStationDetailView(Station station){	
-		bikeTextView.setText(String.valueOf(station.getAvailableBikes()));
-		standTextView.setText(String.valueOf(station.getAvailableBikeStands()));
+	private void hideDetails() {
+		detailing = false;
+		setDetailViewVisible(false);
+		unhighlightMarker();
+	}
+	
+	//TODO should listen to station changes
+	private void showDetails(Marker marker){	
+		int stationNumber = Integer.parseInt(marker.getTitle());
+		Station station = StationManager.INSTANCE.get(stationNumber);
+		centerMap(station);
+		detailing = true;
+		detailedStationNumber = station.getNumber();
+		updateDetailInfo(station);
+		setDetailViewVisible(true);
+		highlightMarker(marker);
+	}
+	
+	private void refreshDetails(){
+		if(detailing){
+			updateDetailInfo(StationManager.INSTANCE.get(detailedStationNumber));
+		}
+	}
+	
+	private void centerMap(Station station){
+		centering = true;
+		map.animateCamera(CameraUpdateFactory.newLatLng(station.getPosition()), 500, null);
+	}
+	
+	private void updateDetailInfo(Station station) {
+		int bikes = station.getAvailableBikes();
+		int stands = station.getAvailableBikeStands();
+		
+		bikeTextView.setText(String.valueOf(bikes));
+		standTextView.setText(String.valueOf(stands));
+		
+		int color;
+		if(bikes == 0){
+			color = RED;
+		}else if(bikes <= 3){
+			color = ORANGE;
+		}else{
+			color = GREEN;
+		}
+		bikeTextView.setTextColor(color);
+		bikeImageView.setColorFilter(color);
+		if(stands == 0){
+			color = RED;
+		}else if(stands <= 3){
+			color = ORANGE;
+		}else{
+			color = GREEN;
+		}
+		standTextView.setTextColor(color);
+		standImageView.setColorFilter(color);
+		
 		stationTextView.setText(String.valueOf(station.getFormattedName()));
 	}
 	
 	private void setDetailViewVisible(boolean visible){
+		int normalSize = getResources().getDimensionPixelSize(R.dimen.refresh_top_margin_standard);	
+		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) refreshButton.getLayoutParams();
+		
 		if(visible){
 			detailContainerView.setVisibility(View.VISIBLE);
-			// change refresh button top margin
+			int detailSize = getResources().getDimensionPixelSize(R.dimen.detail_height);
+			layoutParams.topMargin = detailSize + normalSize;
 		}else{
 			detailContainerView.setVisibility(View.INVISIBLE);
-			// change refresh button top margin
+			layoutParams.topMargin =  normalSize;
 		}
+		refreshButton.setLayoutParams(layoutParams);
 	}
 	
 	private void horribleHackToMoveMyLocationButton() {
@@ -201,6 +274,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
                 map.setOnCameraChangeListener(this);
                 map.setOnMarkerClickListener(this);
                 map.setOnMapClickListener(this);
+                map.setOnMapLongClickListener(this);
             }
         }
     }
@@ -278,7 +352,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private void refreshMarkers(boolean forceRefresh) {
 
 		if(this.map != null){		
-			if(map.getCameraPosition().zoom < 14.0f){ //TODO const
+			if(map.getCameraPosition().zoom < MIN_ZOOM_LEVEL){ //TODO const
 				resetMarkers();
 				return;
 			}
@@ -322,6 +396,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	else{
 		    markerOptions.icon(getClosedStationMarkerBitmapDescriptor());
     	}
+    	
+    	if(detailing && detailedStationNumber != station.getNumber()){
+    		markerOptions.alpha(HIGHLIGHT_ALPHA);
+    	}
+    	
 		return map.addMarker(markerOptions);
 	}
     
@@ -356,6 +435,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private void showMessage(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
+	
+	private void highlightMarker(Marker marker){	
+		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
+		    visibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+		}
+		marker.setAlpha(1.0f);
+	}
+	
+	private void unhighlightMarker(){	
+		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
+		    visibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
+		}
+	}
+	
     
     //------------------- Handling Station Data --------------------- 
     
@@ -395,6 +488,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 				        runOnUiThread(new Runnable() {
 							public void run() {
 								refreshMarkers(true);
+								refreshDetails();
 							}
 						});
 			        }
@@ -440,6 +534,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	public void onCameraChange(CameraPosition position) {
 		refreshMarkers(false);
+		if(!centering){
+			hideDetails();
+		}
+		centering = false;
 	}
 	@Override
 	public void onLocationChanged(Location location) {
@@ -461,17 +559,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 
 	@Override
 	public boolean onMarkerClick(Marker marker) {
-		int stationNumber = Integer.parseInt(marker.getTitle());
-		//TODO should listen to station changes
-		Station station = StationManager.INSTANCE.get(stationNumber);
-		updateStationDetailView(station);
-		setDetailViewVisible(true);
+		showDetails(marker);
 		return true;
 	}
 
 	@Override
 	public void onMapClick(LatLng point) {
-		setDetailViewVisible(false);
+		// TODO should check if tap on detail bar
+		hideDetails();
+	}
+
+	@Override
+	public void onMapLongClick(LatLng point) {
+		// TODO should check if tap on detail bar
+		hideDetails();
 	}
 
 

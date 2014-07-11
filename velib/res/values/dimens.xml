@@ -7,5 +7,6 @@
     <dimen name="center_bike">11dip</dimen>
     <dimen name="center_closed">4dip</dimen>
 	<dimen name="center_stand">1dip</dimen>
-	
+	<dimen name="refresh_top_margin_standard">10dp</dimen>
+	<dimen name="detail_height">40dp</dimen>
 </resources>

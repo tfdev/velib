@@ -10,12 +10,13 @@
 				    android:layout_height="fill_parent">
 
 		<ImageButton android:id="@+id/btn_refresh" 
+		    	 android:alpha="0.9"
 	    		 android:contentDescription="@string/refresh_description"
 	    		 android:background="@drawable/refresh_icon"
 	    		 android:layout_alignParentRight="true"
 	    		 android:layout_alignParentTop="true"
 	    		 android:layout_marginRight="10dp"
-	    		 android:layout_marginTop="10dp"
+	    		 android:layout_marginTop="@dimen/refresh_top_margin_standard"
 				 android:layout_height="30dp"
 				 android:layout_width="30dp"/>              
 
@@ -25,8 +26,9 @@
    		android:id="@+id/detail_layout"
 	   	android:visibility="invisible"
 	    android:layout_width="fill_parent"
-	    android:layout_height="40dp"
-	    android:background="#E1EDFA" >
+	    android:layout_height="@dimen/detail_height"
+	    android:alpha="0.9"
+	    android:background="@drawable/border" >
 
 	    <ImageView
 	        android:id="@+id/bike"
@@ -37,7 +39,7 @@
 	        android:paddingTop="5dp"
 	        android:paddingBottom="5dp"
 	        android:layout_alignParentLeft="true"
-	        android:src="@drawable/blue_bike" />
+	        android:src="@drawable/grey_bike" />
 	
 	    <TextView
 	        android:id="@+id/bike_number"
@@ -56,7 +58,7 @@
 	        android:paddingTop="5dp"
 	        android:paddingBottom="5dp"
 	        android:layout_alignParentRight="true"
-	        android:src="@drawable/parking" />
+	        android:src="@drawable/grey_parking_no_white" />
 	    
 	    <TextView
 	        android:id="@+id/parking_number"
@@ -76,7 +78,8 @@
 	        android:layout_toRightOf="@id/bike_number"
 	        android:paddingLeft="10dp"
 	        android:paddingRight="10dp"
-	        android:textAlignment="center"
+	        android:gravity="center"
+	        android:textColor="#000000"
 	        android:textSize="15sp" />
 
 	</RelativeLayout>

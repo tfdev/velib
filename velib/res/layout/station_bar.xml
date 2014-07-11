@@ -47,18 +47,19 @@
         android:src="@drawable/parking" />
     
    	<TextView
-        android:id="@+id/station_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_toLeftOf="@id/parking_number"
-        android:layout_toRightOf="@id/bike_number"
-        android:ellipsize="marquee"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:scrollHorizontally="false"
-        android:text="Place du bataillon de la République démocratique du Congo"
-        android:textAlignment="center"
-        android:textSize="15sp" />
+   	    android:id="@+id/station_info"
+   	    android:layout_width="wrap_content"
+   	    android:layout_height="wrap_content"
+   	    android:layout_centerInParent="true"
+   	    android:layout_toLeftOf="@id/parking_number"
+   	    android:layout_toRightOf="@id/bike_number"
+   	    android:ellipsize="marquee"
+   	    android:paddingLeft="10dp"
+   	    android:paddingRight="10dp"
+   	    android:scrollHorizontally="false"
+   	    android:text="Place du bataillon de la République démocratique du Congo"
+   	    android:gravity="center"
+   	    android:textColor="#000000"
+   	    android:textSize="15sp" />
 
 </RelativeLayout>
