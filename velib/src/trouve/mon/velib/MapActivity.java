@@ -60,6 +60,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnMapClickListener, 
 														OnMapLongClickListener{
 	
+	enum MarkerSize{
+		TINY,
+		MID,
+		BIG
+	}
+	
 	//----------------- Static Fields ------------------
 	
 	private static final String TAG = MapActivity.class.getName();
@@ -74,7 +80,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private static final float NORMAL_ALPHA = 1.0f;
 	
 	private static final float CENTER_ZOOM_LEVEL = 15.5f;
-	private static final float MIN_ZOOM_LEVEL = 14.5f;
+	private static final float MID_ZOOM_LEVEL = 14.8f;
+	private static final float TINY_ZOOM_LEVEL = 13.8f;
 	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -86,13 +93,18 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     private GoogleMap map;
     private LocationClient locationClient;	
+    
 	private View refreshButton;
 	private Animation refreshButtonAnimation;
+	
 	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
+	private SparseArray<Marker> midVisibleMarkers = new SparseArray<Marker>(100);
+	private SparseArray<Marker> tinyVisibleMarkers = new SparseArray<Marker>(2000);
 	
 	private boolean refreshing = false;
 	private boolean detailing = false;
 	private boolean centering = false;
+	private boolean onCreate = true;
 	
 	private int detailedStationNumber;
 	
@@ -102,7 +114,13 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 
 	private Bitmap markerGreen;
 	private Bitmap markerOrange;
-	private Bitmap markerRed;
+	private BitmapDescriptor markerRed;
+	private BitmapDescriptor markerGreenMid;
+	private BitmapDescriptor markerOrangeMid;
+	private BitmapDescriptor markerRedMid;
+	private BitmapDescriptor markerGreenTiny;
+	private BitmapDescriptor markerOrangeTiny;
+	private BitmapDescriptor markerRedTiny;
 	
 	// Station Details
 	private View detailContainerView;
@@ -126,10 +144,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     @Override
     protected void onResume() {
         super.onResume();
-        setDetailViewVisible(false);
         setUpMapIfNeeded();
-        setUpLocationClientIfNeeded();
-        locationClient.connect();
+        setUpAndConnectLocationClient();
         scheduleUpdateData();
     }
 
@@ -163,6 +179,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	private void setUpStationDetailView(){
 		detailContainerView = findViewById(R.id.detail_layout);
+		detailContainerView.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {}
+		});
+		
 		bikeTextView = (TextView) findViewById(R.id.bike_number);
 		standTextView = (TextView) findViewById(R.id.parking_number);
 		stationTextView = (TextView) findViewById(R.id.station_info);
@@ -176,7 +196,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		unhighlightMarker();
 	}
 	
-	//TODO should listen to station changes
 	private void showDetails(Marker marker){	
 		int stationNumber = Integer.parseInt(marker.getTitle());
 		Station station = StationManager.INSTANCE.get(stationNumber);
@@ -279,6 +298,48 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
 
+    private BitmapDescriptor getMarkerGreenMid() {
+		if(markerGreenMid == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mid_dot_green, null);
+			markerGreenMid = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerGreenMid;
+	}
+	private BitmapDescriptor getMarkerOrangeMid() {
+		if(markerOrangeMid == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mid_dot_orange, null);
+			markerOrangeMid = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerOrangeMid;
+	}
+	private BitmapDescriptor getMarkerRedMid() {
+		if(markerRedMid == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mid_dot_red, null);
+			markerRedMid = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerRedMid;
+	}
+    private BitmapDescriptor getMarkerGreenTiny() {
+		if(markerGreenTiny == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tiny_dot_green, null);
+			markerGreenTiny = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerGreenTiny;
+	}
+	private BitmapDescriptor getMarkerOrangeTiny() {
+		if(markerOrangeTiny == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tiny_dot_orange, null);
+			markerOrangeTiny = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerOrangeTiny;
+	}
+	private BitmapDescriptor getMarkerRedTiny() {
+		if(markerRedTiny == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tiny_dot_red, null);
+			markerRedTiny = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerRedTiny;
+	}
 	private Bitmap getMarkerGreen() {
 		if(markerGreen == null){
 			markerGreen = BitmapFactory.decodeResource(getResources(), R.drawable.markergreen, null);
@@ -291,9 +352,19 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		}
 		return markerOrange;
 	}
-	private Bitmap getMarkerRed() {
+	private BitmapDescriptor getMarkerRedBitmapDescriptor() {
 		if(markerRed == null){
-			markerRed = BitmapFactory.decodeResource(getResources(), R.drawable.markerred, null);
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerred, null)
+									.copy(Bitmap.Config.ARGB_8888, true);
+			Canvas canvas = new Canvas(bitmap);		
+			Paint textPaint = new Paint();
+			textPaint.setTextAlign(Paint.Align.CENTER);
+			textPaint.setTextSize(getBigTextSize());
+			textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+			textPaint.setColor(RED);
+			canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
+
+			markerRed = BitmapDescriptorFactory.fromBitmap(bitmap);
 		}
 		return markerRed;
 	}
@@ -303,33 +374,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private int getTextSize(){
 		return getResources().getDimensionPixelSize(R.dimen.text_size);
 	}
+	private int getBigTextSize(){
+		return getResources().getDimensionPixelSize(R.dimen.big_text_size);
+	}
 	private int getCenterStand(){
 		return getResources().getDimensionPixelSize(R.dimen.center_stand);
 	}
 	private int getCenterBike(){
 		return getResources().getDimensionPixelSize(R.dimen.center_bike);
 	}
-	private BitmapDescriptor getClosedStationMarkerBitmapDescriptor() { // TODO refactor
-		Bitmap bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
-
-		Canvas canvas = new Canvas(bitmap);		
-		Paint textPaint = new Paint();
-		textPaint.setTextAlign(Paint.Align.CENTER);
-		textPaint.setTextSize(getTextSize());
-		textPaint.setTypeface(Typeface.MONOSPACE);
-		textPaint.setColor(RED);
-		canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
-
-		return BitmapDescriptorFactory.fromBitmap(bitmap);
-	}
-	private BitmapDescriptor getMarkerBitmapDescriptor(int bikes, int stands) {
+	private BitmapDescriptor getOpenMarkerBitmapDescriptor(int bikes, int stands) {
 
 		int color;
 		Bitmap bitmap = null;
-		if(bikes == 0 || stands == 0){
-			bitmap = getMarkerRed().copy(Bitmap.Config.ARGB_8888, true);
-			color = RED;
-		}else if (bikes <= 3 || stands <= 3){
+		if (bikes <= 3 || stands <= 3){
 			bitmap = getMarkerOrange().copy(Bitmap.Config.ARGB_8888, true);
 			color = ORANGE;
 		}else{
@@ -341,20 +399,56 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		Paint textPaint = new Paint();
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(getTextSize());
-		textPaint.setTypeface(Typeface.MONOSPACE);
+		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		textPaint.setColor(color);
 		canvas.drawText(String.valueOf(bikes), bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterBike(), textPaint);
 		canvas.drawText(String.valueOf(stands), bitmap.getWidth()/2, bitmap.getHeight()/2 + getCenterStand(), textPaint);
 
 		return BitmapDescriptorFactory.fromBitmap(bitmap);
 	}
+	private BitmapDescriptor getTinyMarkerBitmapDescriptor(Station station) {
+		int bikes = station.getAvailableBikes(), 
+				stands=	station.getAvailableBikeStands();
+		if(bikes == 0 && stands == 0){
+			return getMarkerRedTiny();
+		}else if (bikes <= 3 || stands <= 3){
+			return getMarkerOrangeTiny();
+		}else{
+			return getMarkerGreenTiny();
+		}
+	}
+	private BitmapDescriptor getMidMarkerBitmapDescriptor(Station station) {
+		int bikes = station.getAvailableBikes(), 
+			stands=	station.getAvailableBikeStands();
+		if(bikes == 0 && stands == 0){
+			return getMarkerRedMid();
+		}else if (bikes <= 3 || stands <= 3){
+			return getMarkerOrangeMid();
+		}else{
+			return getMarkerGreenMid();
+		}
+	}
     
 	private void refreshMarkers(boolean forceRefresh) {
-
-		if(this.map != null){		
-			if(map.getCameraPosition().zoom < MIN_ZOOM_LEVEL){ //TODO const
-				resetMarkers();
-				return;
+		if(this.map != null){	
+			SparseArray<Marker> markers;
+			MarkerSize size;
+	
+			if(map.getCameraPosition().zoom > MID_ZOOM_LEVEL){ 
+				resetMarkers(tinyVisibleMarkers);
+				resetMarkers(midVisibleMarkers);
+				markers = visibleMarkers;
+				size = MarkerSize.BIG;
+			}else if(map.getCameraPosition().zoom > TINY_ZOOM_LEVEL){
+				resetMarkers(visibleMarkers);
+				resetMarkers(tinyVisibleMarkers);
+				markers = midVisibleMarkers;	
+				size = MarkerSize.MID;
+			}else{
+				resetMarkers(visibleMarkers);
+				resetMarkers(midVisibleMarkers);
+				markers = tinyVisibleMarkers;
+				size = MarkerSize.TINY;
 			}
 			
 	        LatLngBounds bounds = this.map.getProjection().getVisibleRegion().latLngBounds;
@@ -362,53 +456,60 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			for(int i = 0, nsize = stationMap.size(); i < nsize; i++) {
 			    Station station = stationMap.valueAt(i);
 	            if(bounds.contains(station.getPosition())){
-	                if(visibleMarkers.get(station.getNumber()) == null){
-	                	visibleMarkers.put(station.getNumber(), addMarker(station));
-	                }else if(forceRefresh){
-	                	visibleMarkers.get(station.getNumber()).remove();
-	                	visibleMarkers.put(station.getNumber(), addMarker(station));
+	                if(markers.get(station.getNumber()) == null){
+	                	markers.put(station.getNumber(), addMarker(station, size));             		
+	                }else if(forceRefresh){// not necessary
+	                	markers.get(station.getNumber()).remove();
+	                	markers.put(station.getNumber(), addMarker(station, size)); 
 	                }
 	            }
 	            else{
-	            	if(visibleMarkers.get(station.getNumber()) != null){
-	            		visibleMarkers.get(station.getNumber()).remove();
-	            		visibleMarkers.remove(station.getNumber());
+	            	if(markers.get(station.getNumber()) != null){
+	            		markers.get(station.getNumber()).remove();
+	            		markers.remove(station.getNumber());
 	                }
 	            }
 	        }
 	    }
 	}	
 	
-    private void resetMarkers() {
-		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
-			visibleMarkers.valueAt(i).remove();
+    private void resetMarkers(SparseArray<Marker> markers) {
+		for(int i = 0, nsize = markers.size(); i < nsize; i++) {
+			markers.valueAt(i).remove();
 		}
-		visibleMarkers.clear();
+		markers.clear();
 	}
-
-    private Marker addMarker(Station station) {
+    private Marker addMarker(Station station, MarkerSize markerSize){
     	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
-    													.title(String.valueOf(station.getNumber()));
-									            
-    	if(station.getStatus() == Status.OPEN){
-    		markerOptions.icon(getMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands()));
-    	}
-    	else{
-		    markerOptions.icon(getClosedStationMarkerBitmapDescriptor());
-    	}
+				.title(String.valueOf(station.getNumber()));	
     	
+    	BitmapDescriptor descriptor = null;
+    	switch(markerSize){
+    		case TINY: descriptor = getTinyMarkerBitmapDescriptor(station); break;
+    		case MID: descriptor = getMidMarkerBitmapDescriptor(station); break;
+    		case BIG: descriptor = getBigMarkerBitmapDescriptor(station); break;
+    	}
+    	markerOptions.icon(descriptor);
     	if(detailing && detailedStationNumber != station.getNumber()){
     		markerOptions.alpha(HIGHLIGHT_ALPHA);
     	}
     	
 		return map.addMarker(markerOptions);
+    }
+    private BitmapDescriptor getBigMarkerBitmapDescriptor(Station station) {								            
+    	if(station.getStatus() == Status.OPEN){
+    		return getOpenMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands());
+    	}else{
+		    return getMarkerRedBitmapDescriptor();
+    	}
 	}
     
-    private void setUpLocationClientIfNeeded() {
+    private void setUpAndConnectLocationClient() {
         if (locationClient == null) {
             locationClient = new LocationClient(getApplicationContext(), this,  // ConnectionCallbacks
                     													 this); // OnConnectionFailedListener    
         }
+        locationClient.connect();
     }
 
     private boolean isGpsEnabled(){
@@ -420,7 +521,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	if(!isGpsEnabled()){
     		showMessage("Activez le GPS"); //TODO intl
     	}
-    	else if(locationClient != null){
+    	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
@@ -437,28 +538,28 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void highlightMarker(Marker marker){	
-		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
+		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
 		    visibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
-		}
-		marker.setAlpha(1.0f);
+		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
+			midVisibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
+			tinyVisibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+		marker.setAlpha(NORMAL_ALPHA);
 	}
 	
 	private void unhighlightMarker(){	
-		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++) {
+		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
 		    visibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
-		}
+		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
+			midVisibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
+		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
+			tinyVisibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
 	}
 	
     
     //------------------- Handling Station Data --------------------- 
     
 	private void scheduleUpdateData(){
-		
-		/*ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-		if (networkInfo == null || !networkInfo.isConnected()) {
-			Toast.makeText(this, "Activez la connexion internet", Toast.LENGTH_LONG).show(); //TODO intl
-		} */
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
@@ -541,20 +642,21 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	@Override
 	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub	
 	}
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		// TODO Auto-generated method stub
+		showMessage("Connexion GPS impossible");
 	}
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
-		centerMapOnMyLocation();
+		if(onCreate){
+			centerMapOnMyLocation();
+			onCreate = false;
+		}
 	}
 	@Override
 	public void onDisconnected() {
-		// TODO Auto-generated method stub	
 	}
 
 	@Override
@@ -565,13 +667,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 
 	@Override
 	public void onMapClick(LatLng point) {
-		// TODO should check if tap on detail bar
 		hideDetails();
 	}
 
 	@Override
 	public void onMapLongClick(LatLng point) {
-		// TODO should check if tap on detail bar
 		hideDetails();
 	}
 

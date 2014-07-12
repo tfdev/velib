@@ -4,8 +4,9 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="text_size">13sp</dimen>
+    <dimen name="big_text_size">18sp</dimen>
     <dimen name="center_bike">11dip</dimen>
-    <dimen name="center_closed">4dip</dimen>
+    <dimen name="center_closed">3dip</dimen>
 	<dimen name="center_stand">1dip</dimen>
 	<dimen name="refresh_top_margin_standard">10dp</dimen>
 	<dimen name="detail_height">40dp</dimen>
