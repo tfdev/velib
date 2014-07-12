@@ -1,7 +1,5 @@
 package trouve.mon.velib;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -63,9 +61,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	private static final String TAG = MapActivity.class.getName();
 	
-	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
-	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
-	
 	private static final float HIGHLIGHT_ALPHA = 0.5f;
 	private static final float NORMAL_ALPHA = 1.0f;
 	
@@ -75,9 +70,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(5000)         // 5 seconds
-            .setFastestInterval(16)    // 16ms = 60fps
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    															  .setInterval(5000)
+            													  .setFastestInterval(16)
+            													  .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     
     //-----------------  Instance Fields ------------------
     
@@ -195,7 +190,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		highlightMarker(marker);
 	}
 	
-	private void refreshDetails(){
+	public void refreshDetails(){
 		if(detailing){
 			updateDetailInfo(StationManager.INSTANCE.get(detailedStationNumber));
 		}
@@ -269,11 +264,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
-            // Try to obtain the map from the MapFragment.
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-            // Check if we were successful in obtaining the map.
             if (map != null) {
                 map.setMyLocationEnabled(true);
                 map.setOnMyLocationButtonClickListener(this);
@@ -286,7 +278,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
     
-	private void refreshMarkers(boolean forceRefresh) {
+	public void refreshMarkers(boolean forceRefresh) {
 		if(this.map != null){	
 			SparseArray<Marker> markers;
 			MarkerSize size;
@@ -369,7 +361,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     private void centerMapOnMyLocation(){
     	if(!isGpsEnabled()){
-    		showMessage("Activez le GPS"); //TODO intl
+    		showMessage(getString(R.string.msg_go_gps));
     	}
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
@@ -378,12 +370,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
     		else {
-    			Toast.makeText(this, "En attente d'informations de localisation...", Toast.LENGTH_LONG).show(); //TODO intl
+    			showMessage(getString(R.string.msg_waiting_gps));
     		}
     	}
     }
     
-	private void showMessage(String msg) {
+	public void showMessage(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
 	
@@ -406,72 +398,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			tinyVisibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
 	}
 	
-    
-    //------------------- Handling Station Data --------------------- 
+    public void showRefreshing(){
+    	refreshing = true;
+		refreshButton.startAnimation(refreshButtonAnimation);
+    }
+    public void stopRefreshing(){
+    	refreshing = false;
+		refreshButton.clearAnimation();
+    }
     
 	private void scheduleUpdateData(){
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
-		scheduledRefresh = scheduler.scheduleWithFixedDelay(getRefreshRunnable(), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
-	}
-	
-	private Runnable getRefreshRunnable() {
-		return new Runnable() {
-			public void run() {
-				HttpURLConnection connection = null;
-				runOnUiThread(new Runnable() {
-					public void run() {
-						refreshing = true;
-						refreshButton.startAnimation(refreshButtonAnimation);
-					}
-				});
-				try {
-					URL url = new URL(URL_STATION+API_KEY);
-			        connection = (HttpURLConnection) url.openConnection();
-			        connection.setReadTimeout(10000 /* milliseconds */);
-			        connection.setConnectTimeout(15000 /* milliseconds */);
-			        connection.setRequestMethod("GET");
-			        connection.setDoInput(true);
-			        connection.connect();
-			        if(connection.getResponseCode() == 200){
-			        	StationParser.parse(connection.getInputStream());
-				        runOnUiThread(new Runnable() {
-							public void run() {
-								refreshMarkers(true);
-								refreshDetails();
-							}
-						});
-			        }
-			        else{
-			        	runOnUiThread(new Runnable() {
-							public void run() {
-								showMessage("Service indisponible"); // TODO intl
-							}
-						});
-			        }
-				}
-				catch (Exception e) {
-					Log.e(TAG, "Exception while downloading info", e);
-					runOnUiThread(new Runnable() {
-						public void run() {
-							showMessage("Vérifiez votre connexion internet"); // TODO intl
-						}
-					});
-				}
-				finally{
-					if(connection != null){
-						connection.disconnect();
-					}
-					runOnUiThread(new Runnable() {
-						public void run() {
-							refreshing = false;
-							refreshButton.clearAnimation();
-						}
-					});
-				}
-			}
-		};
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(new DownloadRunnable(this), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
 	
@@ -495,7 +435,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		showMessage("Connexion GPS impossible");
+		showMessage(getString(R.string.msg_no_gps));
 	}
 	@Override
 	public void onConnected(Bundle connectionHint) {

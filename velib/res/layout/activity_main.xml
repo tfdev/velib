@@ -11,7 +11,6 @@
 
 		<ImageButton android:id="@+id/btn_refresh" 
 		    	 android:alpha="0.9"
-	    		 android:contentDescription="@string/refresh_description"
 	    		 android:background="@drawable/refresh_icon"
 	    		 android:layout_alignParentRight="true"
 	    		 android:layout_alignParentTop="true"
