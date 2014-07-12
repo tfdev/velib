@@ -67,6 +67,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private static final float CENTER_ZOOM_LEVEL = 15.5f;
 	private static final float MID_ZOOM_LEVEL = 14.8f;
 	private static final float TINY_ZOOM_LEVEL = 13.8f;
+	private static final float MAX_ZOOM_LEVEL = 13.0f;
 	private static final long REFRESH_PERIOD = 60; //SECONDS
 	
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -83,9 +84,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private View refreshButton;
 	private Animation refreshButtonAnimation;
 	
-	private SparseArray<Marker> visibleMarkers = new SparseArray<Marker>(20);
-	private SparseArray<Marker> midVisibleMarkers = new SparseArray<Marker>(100);
-	private SparseArray<Marker> tinyVisibleMarkers = new SparseArray<Marker>(2000);
+	private SparseArray<Station> visibleMarkers = new SparseArray<Station>(20);
+	private SparseArray<Station> midVisibleMarkers = new SparseArray<Station>(150);
+	private SparseArray<Station> tinyVisibleMarkers = new SparseArray<Station>(600);
 	
 	private boolean refreshing = false;
 	private boolean detailing = false;
@@ -278,56 +279,73 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
     
+	@SuppressWarnings("unchecked")
 	public void refreshMarkers(boolean forceRefresh) {
 		if(this.map != null){	
-			SparseArray<Marker> markers;
+			SparseArray<Station> stationsOnMap;
 			MarkerSize size;
 	
 			if(map.getCameraPosition().zoom > MID_ZOOM_LEVEL){ 
-				resetMarkers(tinyVisibleMarkers);
-				resetMarkers(midVisibleMarkers);
-				markers = visibleMarkers;
+				resetMarkers(tinyVisibleMarkers, midVisibleMarkers);
+				stationsOnMap = visibleMarkers;
 				size = MarkerSize.BIG;
 			}else if(map.getCameraPosition().zoom > TINY_ZOOM_LEVEL){
-				resetMarkers(visibleMarkers);
-				resetMarkers(tinyVisibleMarkers);
-				markers = midVisibleMarkers;	
+				resetMarkers(visibleMarkers, tinyVisibleMarkers);
+				stationsOnMap = midVisibleMarkers;	
 				size = MarkerSize.MID;
-			}else{
-				resetMarkers(visibleMarkers);
-				resetMarkers(midVisibleMarkers);
-				markers = tinyVisibleMarkers;
+			}else if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
+				resetMarkers(visibleMarkers, midVisibleMarkers);
+				stationsOnMap = tinyVisibleMarkers;
 				size = MarkerSize.TINY;
+			}else{
+				resetMarkers(visibleMarkers, midVisibleMarkers, tinyVisibleMarkers);
+				return;
 			}
 			
 	        LatLngBounds bounds = this.map.getProjection().getVisibleRegion().latLngBounds;
-	    	SparseArray<Station> stationMap = StationManager.INSTANCE.getStationMap();
-			for(int i = 0, nsize = stationMap.size(); i < nsize; i++) {
-			    Station station = stationMap.valueAt(i);
-	            if(bounds.contains(station.getPosition())){
-	                if(markers.get(station.getNumber()) == null){
-	                	markers.put(station.getNumber(), addMarker(station, size));             		
-	                }else if(forceRefresh){// not necessary
-	                	markers.get(station.getNumber()).remove();
-	                	markers.put(station.getNumber(), addMarker(station, size)); 
+	    	SparseArray<Station> stations = StationManager.INSTANCE.getStationMap();
+			for(int i = 0, nsize = stations.size(); i < nsize; i++) {
+			    Station station = stations.valueAt(i);
+			    Station stationOnMap = stationsOnMap.get(station.getNumber());
+			    // if station is visible
+	            if(bounds.contains(station.getPosition())){ 
+	                if(stationOnMap == null){ //if there is no marker yet 
+	                	station.setMarker(addMarker(station, size));
+	                	stationsOnMap.put(station.getNumber(), station);             		
+	                }else if(forceRefresh){ //else if data have just been updated
+	                	if(stationOnMap.isDifferent(station)){
+		                	stationOnMap.getMarker().remove();
+		                	station.setMarker(addMarker(station, size));
+		                	stationsOnMap.put(station.getNumber(), station); 
+	                	}else{
+	                		station.setMarker(stationOnMap.getMarker());
+	                		stationsOnMap.put(station.getNumber(), station); 
+	                	}
 	                }
 	            }
-	            else{
-	            	if(markers.get(station.getNumber()) != null){
-	            		markers.get(station.getNumber()).remove();
-	            		markers.remove(station.getNumber());
+	            else{ // station is not visible
+	            	// if there is a marker and just updated
+	            	if(stationOnMap != null && forceRefresh){
+	            		if(stationOnMap.isDifferent(station)){
+	            			stationOnMap.getMarker().remove();
+		            		stationsOnMap.remove(station.getNumber());
+	            		}
 	                }
 	            }
 	        }
 	    }
 	}	
 	
-    private void resetMarkers(SparseArray<Marker> markers) {
-		for(int i = 0, nsize = markers.size(); i < nsize; i++) {
-			markers.valueAt(i).remove();
-		}
-		markers.clear();
+    @SuppressWarnings("unchecked")
+	private void resetMarkers(SparseArray<Station>... arguments) {
+    	for(SparseArray<Station> stations : arguments){
+    		for(int i = 0, nsize = stations.size(); i < nsize; i++) {
+    			stations.valueAt(i).getMarker().remove();
+    		}
+    		stations.clear();
+    	}
 	}
+    
     private Marker addMarker(Station station, MarkerSize markerSize){
     	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
 				.title(String.valueOf(station.getNumber()));	
@@ -381,21 +399,21 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	private void highlightMarker(Marker marker){	
 		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
-		    visibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+		    visibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
-			midVisibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+			midVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
-			tinyVisibleMarkers.valueAt(i).setAlpha(HIGHLIGHT_ALPHA);
+			tinyVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		marker.setAlpha(NORMAL_ALPHA);
 	}
 	
 	private void unhighlightMarker(){	
 		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
-		    visibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
+		    visibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
 		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
-			midVisibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
+			midVisibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
 		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
-			tinyVisibleMarkers.valueAt(i).setAlpha(NORMAL_ALPHA);
+			tinyVisibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
 	}
 	
     public void showRefreshing(){
