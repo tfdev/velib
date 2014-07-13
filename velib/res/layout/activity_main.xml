@@ -9,7 +9,8 @@
    	<RelativeLayout	android:layout_width="fill_parent"
 				    android:layout_height="fill_parent">
 
-		<ImageButton android:id="@+id/btn_refresh" 
+		<ImageButton 
+		    	 android:id="@+id/btn_refresh" 
 		    	 android:alpha="0.9"
 	    		 android:background="@drawable/refresh_icon"
 	    		 android:layout_alignParentRight="true"
@@ -34,9 +35,9 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:adjustViewBounds="true"
-	        android:paddingLeft="2dp"
-	        android:paddingTop="5dp"
-	        android:paddingBottom="5dp"
+	        android:paddingLeft="1dp"
+	        android:paddingTop="@dimen/image_padding_top_bottom"
+	        android:paddingBottom="@dimen/image_padding_top_bottom"
 	        android:layout_alignParentLeft="true"
 	        android:src="@drawable/grey_bike" />
 	
@@ -53,9 +54,9 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:adjustViewBounds="true"
-	        android:paddingRight="4dp"
-	        android:paddingTop="5dp"
-	        android:paddingBottom="5dp"
+	        android:paddingRight="5dp"
+	        android:paddingTop="@dimen/image_padding_top_bottom"
+	        android:paddingBottom="@dimen/image_padding_top_bottom"
 	        android:layout_alignParentRight="true"
 	        android:src="@drawable/grey_parking_no_white" />
 	    
@@ -78,8 +79,11 @@
 	        android:paddingLeft="10dp"
 	        android:paddingRight="10dp"
 	        android:gravity="center"
-	        android:textColor="#000000"
-	        android:textSize="15sp" />
+	        android:textColor="#4a4a4a"
+	        android:textSize="20sp"
+	        android:maxLines="2"
+	        android:textStyle="italic"
+   	    	android:typeface="sans"  />
 
 	</RelativeLayout>
    	

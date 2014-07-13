@@ -15,9 +15,9 @@ public class ResourceDelegate {
 
 	//-----------------  Class Fields ------------------
 	
-	public static final int RED = Color.rgb(181, 12, 22);
-	public static final int ORANGE = Color.rgb(215, 119, 34);
-	public static final int GREEN = Color.rgb(133, 161, 82);
+	public static final int RED 	= Color.rgb(181, 12, 22);
+	public static final int ORANGE 	= Color.rgb(215, 119, 34);
+	public static final int GREEN 	= Color.rgb(133, 161, 82);
 	
 	//-----------------  Instance Fields ------------------
 	
