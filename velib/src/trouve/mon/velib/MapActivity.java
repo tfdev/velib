@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -122,9 +124,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
-        setUpAndConnectLocationClient();
-        scheduleUpdateData();
+        if(getPreferredContract() != null){
+        	setUpMapIfNeeded();
+            setUpAndConnectLocationClient();
+            scheduleUpdateData();
+        }
     }
 
 	@Override
@@ -429,9 +433,18 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
-		scheduledRefresh = scheduler.scheduleWithFixedDelay(new DownloadRunnable(this), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(new DownloadRunnable(this, getPreferredContract()), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
+	private String getPreferredContract(){
+		SharedPreferences settings = getSharedPreferences(Contrat.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
+	    String preferredContract = settings.getString(Contrat.CONTRACT_PREFERENCE_KEY, null);
+	    if(preferredContract == null){
+	    	Intent intent = new Intent(this, ContratListActivity.class);
+	    	startActivity(intent);
+	    }
+	    return preferredContract;
+	}
 	
 	//----------------- Interface Implementation ------------------
     

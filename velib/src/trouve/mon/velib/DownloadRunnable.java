@@ -12,17 +12,19 @@ public class DownloadRunnable implements Runnable{
 	
 	private static final String TAG = DownloadRunnable.class.getName();
 	
-	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=Paris&apiKey=";
-	private static final String API_KEY = "df89b09292638d3c4a2731f771db3f43c514685d";
+	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=";
+	private static final String API_KEY = "&apiKey=df89b09292638d3c4a2731f771db3f43c514685d";
 	
 	//-----------------  Instance Fields ------------------
 	
 	private MapActivity mapActivity;
+	private String contractName = "Paris";
 	
 	//-----------------  Instance Methods ------------------
 	
-	public DownloadRunnable(MapActivity activity) {
+	public DownloadRunnable(MapActivity activity, String contractName) {
 		this.mapActivity = activity;
+		this.contractName = contractName;
 	}
 	
 	public void run() {
@@ -33,7 +35,7 @@ public class DownloadRunnable implements Runnable{
 			}
 		});
 		try {
-			URL url = new URL(URL_STATION+API_KEY);
+			URL url = new URL(URL_STATION + contractName + API_KEY);
 	        connection = (HttpURLConnection) url.openConnection();
 	        connection.setReadTimeout(10000 /* milliseconds */);
 	        connection.setConnectTimeout(15000 /* milliseconds */);
