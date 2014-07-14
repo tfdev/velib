@@ -433,7 +433,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
-		scheduledRefresh = scheduler.scheduleWithFixedDelay(new DownloadRunnable(this, getPreferredContract()), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(new StationUpdater(this, getPreferredContract()), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
 	private String getPreferredContract(){

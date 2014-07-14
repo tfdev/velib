@@ -1,5 +1,7 @@
 package trouve.mon.velib;
 
+import java.util.List;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,11 +14,17 @@ import android.widget.ListView;
 public class ContratListActivity extends ListActivity {
 
 	
+	// TODO should check for connectivity
+	// TODO should check for lifecycle behavior
+	// TODO should check for errors
+	// TODO should refactor Runnable code
+	
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        ListAdapter adapter = new ArrayAdapter<>(this, R.layout.contract_row, R.id.contract_name, Contrat.contrats);
-        setListAdapter(adapter);
+        setContentView(R.layout.contract_list);
+        loadContract();
 	}
 	
 	@Override
@@ -27,6 +35,17 @@ public class ContratListActivity extends ListActivity {
 			startActivity(intent);
 		}
 	}
+	
+	private void loadContract(){
+		new Thread(new ContractUpdater(this)).start();
+	}
+	
+	public void setContract(List<Contrat> contracts){
+		findViewById(R.id.progressBar).setVisibility(View.GONE);
+		ListAdapter adapter = new ArrayAdapter<>(this, R.layout.contract_row, R.id.contract_name, contracts);
+        setListAdapter(adapter);
+	}
+	
 	
 	private boolean savePreference(String contractName){		
 		SharedPreferences settings = getSharedPreferences(Contrat.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);

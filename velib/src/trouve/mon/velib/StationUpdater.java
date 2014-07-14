@@ -5,12 +5,12 @@ import java.net.URL;
 
 import android.util.Log;
 
-public class DownloadRunnable implements Runnable{
+public class StationUpdater implements Runnable{
 
 	
 	//-----------------  Class Fields ------------------
 	
-	private static final String TAG = DownloadRunnable.class.getName();
+	private static final String TAG = StationUpdater.class.getName();
 	
 	private static final String URL_STATION = "https://api.jcdecaux.com/vls/v1/stations?contract=";
 	private static final String API_KEY = "&apiKey=df89b09292638d3c4a2731f771db3f43c514685d";
@@ -18,11 +18,11 @@ public class DownloadRunnable implements Runnable{
 	//-----------------  Instance Fields ------------------
 	
 	private MapActivity mapActivity;
-	private String contractName = "Paris";
+	private String contractName;
 	
 	//-----------------  Instance Methods ------------------
 	
-	public DownloadRunnable(MapActivity activity, String contractName) {
+	public StationUpdater(MapActivity activity, String contractName) {
 		this.mapActivity = activity;
 		this.contractName = contractName;
 	}
