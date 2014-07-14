@@ -185,11 +185,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void showDetails(Marker marker){	
+		detailing = true;
 		int stationNumber = Integer.parseInt(marker.getTitle());
+		detailedStationNumber = stationNumber;
+		
 		Station station = StationManager.INSTANCE.get(stationNumber);
 		centerMap(station);
-		detailing = true;
-		detailedStationNumber = station.getNumber();
 		updateDetailInfo(station);
 		setDetailViewVisible(true);
 		highlightMarker(marker);
@@ -388,6 +389,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
+    			hideDetails();
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
         		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
