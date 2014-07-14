@@ -1,6 +1,6 @@
 package trouve.mon.velib;
 
-public class Contrat {
+public class Contrat implements Comparable<Contrat>{
 	
 	enum Country{
 		BE,
@@ -61,6 +61,11 @@ public class Contrat {
 	
 	public String toString(){
 		return getName();
+	}
+
+	@Override
+	public int compareTo(Contrat another) {
+		return getName().compareTo(another.getName());
 	}
 	
 }
