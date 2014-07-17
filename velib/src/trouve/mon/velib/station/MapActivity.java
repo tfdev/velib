@@ -1,10 +1,19 @@
-package trouve.mon.velib;
+package trouve.mon.velib.station;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import trouve.mon.velib.R;
+import trouve.mon.velib.ResourceDelegate;
+import trouve.mon.velib.R.anim;
+import trouve.mon.velib.R.dimen;
+import trouve.mon.velib.R.id;
+import trouve.mon.velib.R.layout;
+import trouve.mon.velib.R.string;
+import trouve.mon.velib.contract.Contract;
+import trouve.mon.velib.contract.ContractListActivity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -115,7 +124,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setUpResourceDelegate();
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
 		setUpRefreshButton();
 		setUpStationDetailView();
@@ -284,6 +293,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
     }
     
+    
+    //TODO should check for GC and leak
 	@SuppressWarnings("unchecked")
 	public void refreshMarkers(boolean forceRefresh) {
 		if(this.map != null){	
@@ -439,11 +450,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private String getPreferredContract(){
-		SharedPreferences settings = getSharedPreferences(Contrat.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
-	    String preferredContract = settings.getString(Contrat.CONTRACT_PREFERENCE_KEY, null);
+		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
+	    String preferredContract = settings.getString(Contract.CONTRACT_PREFERENCE_KEY, null);
 	    if(preferredContract == null){
-	    	Intent intent = new Intent(this, ContratListActivity.class);
+	    	Intent intent = new Intent(this, ContractListActivity.class);
 	    	startActivity(intent);
+	    	finish();
 	    }
 	    return preferredContract;
 	}

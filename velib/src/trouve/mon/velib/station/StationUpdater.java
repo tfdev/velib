@@ -1,8 +1,10 @@
-package trouve.mon.velib;
+package trouve.mon.velib.station;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import trouve.mon.velib.R;
+import trouve.mon.velib.R.string;
 import android.util.Log;
 
 public class StationUpdater implements Runnable{

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Trouve mon velib</string>
+    <string name="app_name">Mon vélo</string>
+    
+    <string name="ok">OK</string>
     
     <!-- Message -->
     
@@ -12,5 +14,9 @@
 	<string name="msg_no_data">Service indisponible</string>
 	
 	<string name="msg_waiting_gps">En attente d\'informations de localisation&#8230;</string>
+	
+	<!-- Other -->
+    
+	<string name="select_city">Sélectionnez votre ville</string>
 	
 </resources>

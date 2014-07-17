@@ -1,4 +1,4 @@
-package trouve.mon.velib;
+package trouve.mon.velib.contract;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -18,11 +18,11 @@ public class ContractUpdater implements Runnable{
 	
 	//-----------------  Instance Fields ------------------
 	
-	private ContratListActivity activity;
+	private ContractListActivity activity;
 	
 	//-----------------  Instance Methods ------------------
 	
-	public ContractUpdater(ContratListActivity activity) {
+	public ContractUpdater(ContractListActivity activity) {
 		this.activity = activity;
 	}
 	
@@ -42,10 +42,10 @@ public class ContractUpdater implements Runnable{
 	        connection.setDoInput(true);
 	        connection.connect();
 	        if(connection.getResponseCode() == 200){
-	        	final List<Contrat> contrats = ContratParser.parse(connection.getInputStream());
+	        	final List<Contract> contracts = ContractParser.parse(connection.getInputStream());
 	        	activity.runOnUiThread(new Runnable() {
 					public void run() {
-						activity.setContract(contrats);
+						activity.setContract(contracts);
 					}
 				});
 	        }

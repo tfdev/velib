@@ -1,4 +1,4 @@
-package trouve.mon.velib;
+package trouve.mon.velib.station;
 
 import java.io.IOException;
 import java.io.InputStream;

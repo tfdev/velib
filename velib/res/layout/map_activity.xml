@@ -28,7 +28,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="@dimen/detail_height"
 	    android:alpha="0.9"
-	    android:background="@drawable/border" >
+	    android:background="@drawable/bottom_border" >
 
 	    <ImageView
 	        android:id="@+id/bike"

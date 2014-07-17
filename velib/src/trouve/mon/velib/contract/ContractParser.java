@@ -1,4 +1,4 @@
-package trouve.mon.velib;
+package trouve.mon.velib.contract;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +23,7 @@ import android.util.JsonReader;
  */
 
 
-public abstract class ContratParser {
+public abstract class ContractParser {
 	
 	//----------------- Static Fields ------------------
 	
@@ -36,8 +36,8 @@ public abstract class ContratParser {
 	
 	//----------------- Static Methods ------------------
 	
-	public static List<Contrat> parse(InputStream inputStream) throws IOException {
-		List<Contrat> contracts = null;
+	public static List<Contract> parse(InputStream inputStream) throws IOException {
+		List<Contract> contracts = null;
 		JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
 	    try {
 	    	contracts = readContractArray(reader);
@@ -49,8 +49,8 @@ public abstract class ContratParser {
 	    return contracts;
 	}
 	
-	private static List<Contrat> readContractArray(JsonReader reader) throws IOException {
-		List<Contrat> contracts = new ArrayList<Contrat>();
+	private static List<Contract> readContractArray(JsonReader reader) throws IOException {
+		List<Contract> contracts = new ArrayList<Contract>();
 		reader.beginArray();
 	    while (reader.hasNext()) {
 	    	contracts.add(readContract(reader));
@@ -60,8 +60,8 @@ public abstract class ContratParser {
 	}
 
 
-	private static Contrat readContract(JsonReader reader) throws IOException {
-		Contrat contrat = new Contrat();
+	private static Contract readContract(JsonReader reader) throws IOException {
+		Contract contract = new Contract();
 
 	    reader.beginObject();
 	    while (reader.hasNext()) {
@@ -71,17 +71,17 @@ public abstract class ContratParser {
 	    	//}
 	    	//else 
 	    	if(ATTRIBUTE_NAME.equals(attribute)){
-	    		contrat.setName(reader.nextString());
+	    		contract.setName(reader.nextString());
 	    	}
 	    	else if(ATTRIBUTE_SERVICE_NAME.equals(attribute)){
-	    		contrat.setServiceName(reader.nextString());
+	    		contract.setServiceName(reader.nextString());
 	    	}	
 			else {
 				reader.skipValue();
 		    }
 	     }
 	     reader.endObject();
-	     return contrat;
+	     return contract;
 	}
 
 	

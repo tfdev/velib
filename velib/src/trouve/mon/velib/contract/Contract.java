@@ -1,6 +1,6 @@
-package trouve.mon.velib;
+package trouve.mon.velib.contract;
 
-public class Contrat implements Comparable<Contrat>{
+public class Contract implements Comparable<Contract>{
 	
 	enum Country{
 		BE,
@@ -8,12 +8,12 @@ public class Contrat implements Comparable<Contrat>{
 		FR
 	}
 	
-	public static Contrat[] contrats = new Contrat[]{
+	public static Contract[] contracts = new Contract[]{
 		
-		new Contrat("Lyon", 		Country.FR, "Vélo'V"),
-		new Contrat("Marseille", 	Country.FR, "Le vélo"),
-		new Contrat("Paris", 		Country.FR, "Velib"),
-		new Contrat("Toulouse", 	Country.FR, "Vélô")
+		new Contract("Lyon", 		Country.FR, "Vélo'V"),
+		new Contract("Marseille", 	Country.FR, "Le vélo"),
+		new Contract("Paris", 		Country.FR, "Velib"),
+		new Contract("Toulouse", 	Country.FR, "Vélô")
 	};
 	
 	
@@ -24,11 +24,11 @@ public class Contrat implements Comparable<Contrat>{
 	private Country country;
 	private String serviceName;
 		
-	public Contrat() {
+	public Contract() {
 		super();
 	}
 	
-	public Contrat(String name, Country country, String serviceName) {
+	public Contract(String name, Country country, String serviceName) {
 		super();
 		this.setName(name);
 		this.setCountry(country);
@@ -64,7 +64,7 @@ public class Contrat implements Comparable<Contrat>{
 	}
 
 	@Override
-	public int compareTo(Contrat another) {
+	public int compareTo(Contract another) {
 		return getName().compareTo(another.getName());
 	}
 	

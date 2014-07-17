@@ -4,6 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
   
+  	<RelativeLayout
+   		android:id="@+id/detail_layout"
+   		android:layout_alignParentBottom="true"
+	    android:layout_width="fill_parent"
+	    android:layout_height="@dimen/detail_height"
+	    android:background="@drawable/top_border" >
+    
+    	<Button
+	        android:id="@+id/okButton"
+	        android:enabled="false"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:text="@string/ok" />
+    	
+    </RelativeLayout>
+    
+    
+    <TextView
+        android:id="@+id/listHeader"
+        android:text="@string/select_city"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center" 
+		android:scrollbars="none"
+		android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+		style="?android:attr/listSeparatorTextViewStyle" />
+    
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleLarge"
@@ -15,8 +44,10 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_below="@id/listHeader"
+        android:layout_above="@id/detail_layout"
+        android:listSelector="@android:color/darker_gray"
+        android:choiceMode="singleChoice">
     </ListView>
     
 </RelativeLayout>

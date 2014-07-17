@@ -3,13 +3,29 @@
  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_width="match_parent"
      android:layout_height="wrap_content"
+     android:padding="5dp"
      android:orientation="vertical">
 
-     <TextView android:id="@+id/contract_name"
-         android:textSize="24sp"
+     <TextView 
+         android:id="@+id/contract_name"
+         style="@android:style/TextAppearance.Large"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
+         android:text="Paris"
+         />
+     
+     <TextView 
+         android:id="@+id/service_name"
+         style="@android:style/TextAppearance.Medium"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="Vélib"
+         />
+     
+         <!--  
+         android:textSize="24sp"
          android:layout_margin="5dp"
-         android:paddingLeft="5dp"/>
+         android:paddingLeft="5dp"
+         -->
 
  </LinearLayout>

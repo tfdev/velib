@@ -1,5 +1,8 @@
 package trouve.mon.velib;
 
+import trouve.mon.velib.station.Station;
+import trouve.mon.velib.station.Status;
+
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
