@@ -3,21 +3,20 @@ package trouve.mon.velib.contract;
 import java.util.List;
 
 import trouve.mon.velib.R;
-import trouve.mon.velib.R.id;
-import trouve.mon.velib.R.layout;
 import trouve.mon.velib.station.MapActivity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 public class ContractListActivity extends ListActivity {
 
+	public final static int REQUEST_CODE_USE_EXISTING_MAP = 11;
+	public final static String EXTRA_CODE = "requestCode";
 	
 	// TODO should check for connectivity
 	// TODO should check for lifecycle behavior
@@ -52,12 +51,13 @@ public class ContractListActivity extends ListActivity {
 	}
 	
 	private void loadContract(){
+		//TODO asynctask
 		new Thread(new ContractUpdater(this)).start();
 	}
 	
 	public void setContract(List<Contract> contracts){
 		findViewById(R.id.progressBar).setVisibility(View.GONE);
-		ListAdapter adapter = new ArrayAdapter<>(this, R.layout.contract_row, R.id.contract_name, contracts);
+		ListAdapter adapter = new ContractAdapter(this, R.layout.contract_row, contracts);
         setListAdapter(adapter);
 	}
 	
@@ -68,14 +68,15 @@ public class ContractListActivity extends ListActivity {
 	    return editor.commit();
 	}
 	
-	private String getPreferredContract(){
-		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
-	    return settings.getString(Contract.CONTRACT_PREFERENCE_KEY, null);
-	}
-	
-	private void startMapActivity(){
-		Intent intent = new Intent(this, MapActivity.class);
-		startActivity(intent);
+	//TODO fixme !!!
+	private void startMapActivity(){	
+		if( getIntent().getExtras().getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){
+			Intent intent = new Intent(this, MapActivity.class);
+			startActivity(intent);
+		}else{
+			Intent resultIntent = new Intent();
+			setResult(RESULT_OK, resultIntent);
+		}
 		finish();
 	}
 }

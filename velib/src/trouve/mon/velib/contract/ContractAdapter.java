@@ -1,0 +1,56 @@
+package trouve.mon.velib.contract;
+
+import java.util.List;
+
+import trouve.mon.velib.R;
+import android.app.Activity;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+
+
+
+public class ContractAdapter extends ArrayAdapter<Contract> {
+
+	Context context;
+	int resource;
+	List<Contract> contracts;
+	
+	public ContractAdapter(Context context, int resource, List<Contract> objects) {
+		super(context, resource, objects);
+		this.context = context;
+		this.resource = resource;
+		this.contracts = objects;
+	}
+
+	@Override
+	public View getView (int position, View convertView, ViewGroup parent){
+		ContractHolder holder = null;
+		View row = convertView;
+		Contract contract = contracts.get(position);
+		
+		if(row == null){
+			LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+            row = inflater.inflate(resource, parent, false);
+            holder = new ContractHolder();
+            holder.contrat = (TextView) row.findViewById(R.id.contract_name);
+            holder.service = (TextView) row.findViewById(R.id.service_name);
+            row.setTag(holder);
+		}else{
+			holder = (ContractHolder) row.getTag();
+		}
+		
+		holder.contrat.setText(contract.getName());
+		holder.service.setText(contract.getServiceName());
+		
+		return row;
+	}
+	
+	static class ContractHolder{
+		TextView contrat;
+		TextView service;
+	}
+}

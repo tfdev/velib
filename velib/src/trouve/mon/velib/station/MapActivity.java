@@ -7,11 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.ResourceDelegate;
-import trouve.mon.velib.R.anim;
-import trouve.mon.velib.R.dimen;
-import trouve.mon.velib.R.id;
-import trouve.mon.velib.R.layout;
-import trouve.mon.velib.R.string;
 import trouve.mon.velib.contract.Contract;
 import trouve.mon.velib.contract.ContractListActivity;
 import android.app.Activity;
@@ -93,6 +88,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private LocationClient locationClient;	
     
 	private View refreshButton;
+	private View configButton;
 	private Animation refreshButtonAnimation;
 	
 	private SparseArray<Station> visibleMarkers = new SparseArray<Station>(20);
@@ -117,6 +113,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private TextView stationTextView;
 	private ImageView bikeImageView;
 	private ImageView standImageView;
+
+	
 	
 	//-----------------  Activity Lifecycle ------------------
 	
@@ -127,6 +125,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
 		setUpRefreshButton();
+		setUpConfigButton();
 		setUpStationDetailView();
 	}
 	
@@ -159,6 +158,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	}
     }
 	
+    private void setUpConfigButton() {
+		configButton = findViewById(R.id.btn_config);
+		configButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				startConfigActivity(true);
+			}
+		});
+	}
+    
 	private void setUpRefreshButton(){
 		refreshButton = findViewById(R.id.btn_refresh);
 		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
@@ -247,18 +255,24 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void setDetailViewVisible(boolean visible){
-		int normalSize = getResources().getDimensionPixelSize(R.dimen.refresh_top_margin_standard);	
-		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) refreshButton.getLayoutParams();
+		int refreshNormalSize = getResources().getDimensionPixelSize(R.dimen.refresh_top_margin_standard);	
+		int configNormalSize = getResources().getDimensionPixelSize(R.dimen.config_top_margin_standard);	
+		
+		RelativeLayout.LayoutParams refreshLayoutParams = (RelativeLayout.LayoutParams) refreshButton.getLayoutParams();
+		RelativeLayout.LayoutParams configLayoutParams = (RelativeLayout.LayoutParams) configButton.getLayoutParams();
 		
 		if(visible){
 			detailContainerView.setVisibility(View.VISIBLE);
 			int detailSize = getResources().getDimensionPixelSize(R.dimen.detail_height);
-			layoutParams.topMargin = detailSize + normalSize;
+			refreshLayoutParams.topMargin = detailSize + refreshNormalSize;
+			configLayoutParams.topMargin = detailSize + configNormalSize;
 		}else{
-			detailContainerView.setVisibility(View.INVISIBLE);
-			layoutParams.topMargin =  normalSize;
+			detailContainerView.setVisibility(View.GONE);
+			refreshLayoutParams.topMargin =  refreshNormalSize;
+			configLayoutParams.topMargin = configNormalSize;
 		}
-		refreshButton.setLayoutParams(layoutParams);
+		refreshButton.setLayoutParams(refreshLayoutParams);
+		configButton.setLayoutParams(configLayoutParams);
 	}
 	
 	private void horribleHackToMoveMyLocationButton() {
@@ -351,6 +365,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	        }
 	    }
 	}	
+	
+	@SuppressWarnings("unchecked")
+	private void resetAllMarkers(){
+		resetMarkers(tinyVisibleMarkers, midVisibleMarkers, visibleMarkers);
+	}
 	
     @SuppressWarnings("unchecked")
 	private void resetMarkers(SparseArray<Station>... arguments) {
@@ -453,15 +472,34 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
 	    String preferredContract = settings.getString(Contract.CONTRACT_PREFERENCE_KEY, null);
 	    if(preferredContract == null){
-	    	Intent intent = new Intent(this, ContractListActivity.class);
-	    	startActivity(intent);
-	    	finish();
+	    	startConfigActivity(false);
 	    }
 	    return preferredContract;
 	}
 	
+	private void startConfigActivity(boolean keepActivity){
+		Intent intent = new Intent(this, ContractListActivity.class);
+		if(keepActivity){
+			intent.putExtra(ContractListActivity.EXTRA_CODE, ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP);
+			startActivityForResult(intent, ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP);
+		}else{
+			startActivity(intent);
+			finish();
+		}
+	}
+	
+	
 	//----------------- Interface Implementation ------------------
     
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP){
+			if(resultCode == RESULT_OK){
+				resetAllMarkers();
+			}
+		}
+	}
+	
     @Override
     public boolean onMyLocationButtonClick() {
 		centerMapOnMyLocation();

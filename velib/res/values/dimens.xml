@@ -14,6 +14,8 @@
     <dimen name="big_text_size">18sp</dimen>
     
 	<dimen name="refresh_top_margin_standard">10dp</dimen>
+	<dimen name="config_top_margin_standard">50dp</dimen>
+	<dimen name="buttons_size">30dp</dimen>
 	<dimen name="detail_height">50dp</dimen>
 	<dimen name="image_padding_top_bottom">11dp</dimen>
 </resources>
