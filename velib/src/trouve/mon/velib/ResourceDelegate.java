@@ -90,19 +90,19 @@ public class ResourceDelegate {
 	}
 	public Bitmap getMarkerGreen() {
 		if(markerGreen == null){
-			markerGreen = BitmapFactory.decodeResource(getResources(), R.drawable.markergreen, null);
+			markerGreen = BitmapFactory.decodeResource(getResources(), R.drawable.marker_green, null);
 		}
 		return markerGreen;
 	}
 	public Bitmap getMarkerOrange() {
 		if(markerOrange == null){
-			markerOrange = BitmapFactory.decodeResource(getResources(), R.drawable.markerorange, null);
+			markerOrange = BitmapFactory.decodeResource(getResources(), R.drawable.marker_orange, null);
 		}
 		return markerOrange;
 	}
 	public BitmapDescriptor getMarkerRedBitmapDescriptor() {
 		if(markerRed == null){
-			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.markerred, null)
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_red, null)
 									.copy(Bitmap.Config.ARGB_8888, true);
 			Canvas canvas = new Canvas(bitmap);		
 			Paint textPaint = new Paint();

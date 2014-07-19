@@ -50,7 +50,7 @@
 	        android:paddingTop="@dimen/image_padding_top_bottom"
 	        android:paddingBottom="@dimen/image_padding_top_bottom"
 	        android:layout_alignParentLeft="true"
-	        android:src="@drawable/grey_bike" />
+	        android:src="@drawable/ic_bike" />
 	
 	    <TextView
 	        android:id="@+id/bike_number"
@@ -69,7 +69,7 @@
 	        android:paddingTop="@dimen/image_padding_top_bottom"
 	        android:paddingBottom="@dimen/image_padding_top_bottom"
 	        android:layout_alignParentRight="true"
-	        android:src="@drawable/grey_parking_no_white" />
+	        android:src="@drawable/ic_parking" />
 	    
 	    <TextView
 	        android:id="@+id/parking_number"
