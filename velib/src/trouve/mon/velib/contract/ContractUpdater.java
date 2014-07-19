@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import trouve.mon.velib.R;
 import android.util.Log;
 
 public class ContractUpdater implements Runnable{
@@ -30,7 +31,7 @@ public class ContractUpdater implements Runnable{
 		HttpURLConnection connection = null;
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
-				//activity.showRefreshing();
+				activity.showLoading();
 			}
 		});
 		try {
@@ -52,7 +53,7 @@ public class ContractUpdater implements Runnable{
 	        else{
 	        	activity.runOnUiThread(new Runnable() {
 					public void run() {
-						//activity.showMessage(activity.getString(R.string.msg_no_data)); 
+						activity.showError(R.string.msg_no_data); 
 					}
 				});
 	        }
@@ -61,7 +62,7 @@ public class ContractUpdater implements Runnable{
 			Log.e(TAG, "Exception while downloading info", e);
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
-					//activity.showMessage(activity.getString(R.string.msg_check_internet));
+					activity.showError(R.string.msg_check_internet);
 				}
 			});
 		}
@@ -69,11 +70,6 @@ public class ContractUpdater implements Runnable{
 			if(connection != null){
 				connection.disconnect();
 			}
-			activity.runOnUiThread(new Runnable() {
-				public void run() {
-					//activity.stopRefreshing();
-				}
-			});
 		}
 	}
 	

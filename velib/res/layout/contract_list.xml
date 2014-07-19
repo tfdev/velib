@@ -11,6 +11,15 @@
 	    android:layout_height="@dimen/ok_bar_height"
 	    android:background="@drawable/top_border" >
     
+  	    <ImageButton 
+		    	 android:id="@+id/btn_refresh"
+	    		 android:background="@drawable/ic_action_refresh"
+	    		 android:layout_alignParentLeft="true"
+	    		 android:layout_margin="10dp"
+	    		 android:layout_centerVertical="true"
+				 android:layout_height="wrap_content"
+				 android:layout_width="wrap_content"/>
+  	    
     	<Button
 	        android:id="@+id/okButton"
 	        android:enabled="false"
@@ -19,6 +28,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentRight="true"
 	        android:layout_margin="10dp"
+	        android:padding="5dp"
 	        android:text="@string/ok" />
     	
     </RelativeLayout>
@@ -40,6 +50,13 @@
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+    
+    <TextView
+        android:id="@+id/msgTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:layout_centerInParent="true"/>
 
     <ListView
