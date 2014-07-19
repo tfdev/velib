@@ -66,11 +66,10 @@ public abstract class ContractParser {
 	    reader.beginObject();
 	    while (reader.hasNext()) {
 	    	String attribute = reader.nextName();
-	    	//if(ATTRIBUTE_COUNTRY.equals(attribute)){
-	    		// TODO
-	    	//}
-	    	//else 
-	    	if(ATTRIBUTE_NAME.equals(attribute)){
+	    	if(ATTRIBUTE_COUNTRY.equals(attribute)){
+	    		contract.setCountry(reader.nextString());
+	    	}
+	    	else if(ATTRIBUTE_NAME.equals(attribute)){
 	    		contract.setName(reader.nextString());
 	    	}
 	    	else if(ATTRIBUTE_SERVICE_NAME.equals(attribute)){

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -38,6 +39,7 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
             holder = new ContractHolder();
             holder.contrat = (TextView) row.findViewById(R.id.contract_name);
             holder.service = (TextView) row.findViewById(R.id.service_name);
+            holder.flag = (ImageView) row.findViewById(R.id.country_flag);
             row.setTag(holder);
 		}else{
 			holder = (ContractHolder) row.getTag();
@@ -45,6 +47,12 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 		
 		holder.contrat.setText(contract.getName());
 		holder.service.setText(contract.getServiceName());
+		String country = contract.getCountry();
+		if( country != null){
+			int res = Country.getDrawableResourceId(country);
+			if(res != -1)
+				holder.flag.setImageResource(res);
+		}
 		
 		return row;
 	}
@@ -52,5 +60,6 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 	static class ContractHolder{
 		TextView contrat;
 		TextView service;
+		ImageView flag;
 	}
 }

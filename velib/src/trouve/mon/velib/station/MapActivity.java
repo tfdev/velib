@@ -439,9 +439,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
     			hideDetails();
-    			showMessageIfNoStation = true;
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
+        		map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
     		else {
     			showMessage(getString(R.string.msg_waiting_gps));
