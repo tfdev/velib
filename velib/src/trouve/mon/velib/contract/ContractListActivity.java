@@ -70,7 +70,8 @@ public class ContractListActivity extends ListActivity {
 	
 	//TODO fixme !!!
 	private void startMapActivity(){	
-		if( getIntent().getExtras().getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){
+		Bundle bundle = getIntent().getExtras();
+		if( bundle == null || bundle.getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){
 			Intent intent = new Intent(this, MapActivity.class);
 			startActivity(intent);
 		}else{

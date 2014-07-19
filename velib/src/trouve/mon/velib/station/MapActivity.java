@@ -495,6 +495,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP){
 			if(resultCode == RESULT_OK){
+				StationManager.INSTANCE.getStationMap().clear();
 				resetAllMarkers();
 			}
 		}
