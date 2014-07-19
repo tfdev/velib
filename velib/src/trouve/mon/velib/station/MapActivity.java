@@ -99,7 +99,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private boolean detailing = false;
 	private boolean centering = false;
 	private boolean onCreate = true;
-	private boolean showMessageIfNoStation;
+	private boolean showMessageIfNoStation = false;
 	
 	private int detailedStationNumber;
 	
@@ -431,7 +431,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     	 return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
     
-    private void centerMapOnMyLocation(){
+    private void centerMapOnMyLocation(boolean animateCamera){
     	if(!isGpsEnabled()){
     		showMessage(getString(R.string.msg_go_gps));
     	}
@@ -440,7 +440,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     		if(lastLocation != null){
     			hideDetails();
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        		map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
+        		if(animateCamera)
+        			map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
+        		else
+        			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
     		else {
     			showMessage(getString(R.string.msg_waiting_gps));
@@ -528,7 +531,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
     @Override
     public boolean onMyLocationButtonClick() {
-		centerMapOnMyLocation();
+		centerMapOnMyLocation(true);
 		return true;
 	}
 	@Override
@@ -550,7 +553,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	public void onConnected(Bundle connectionHint) {
 		locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
 		if(onCreate){
-			centerMapOnMyLocation();
+			centerMapOnMyLocation(false);
 			onCreate = false;
 		}
 	}
