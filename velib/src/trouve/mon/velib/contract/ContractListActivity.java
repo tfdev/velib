@@ -24,6 +24,7 @@ public class ContractListActivity extends ListActivity {
 	// TODO should refactor Runnable code
 	
 	private Contract selectedContract;
+
 	private Button okButton;
 	
 	@Override
@@ -38,7 +39,7 @@ public class ContractListActivity extends ListActivity {
 		okButton = (Button) findViewById(R.id.okButton);
         okButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				savePreference(selectedContract.getName());
+				savePreference(selectedContract.getName(), selectedContract.getServiceName());
 				startMapActivity();
 			}
 		});
@@ -61,14 +62,14 @@ public class ContractListActivity extends ListActivity {
         setListAdapter(adapter);
 	}
 	
-	private boolean savePreference(String contractName){		
+	private boolean savePreference(String contractName, String serviceName){		
 		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
 	    SharedPreferences.Editor editor = settings.edit();
 	    editor.putString(Contract.CONTRACT_PREFERENCE_KEY, contractName);
+	    editor.putString(Contract.SERVICE_PREFERENCE_KEY, serviceName);
 	    return editor.commit();
 	}
 	
-	//TODO fixme !!!
 	private void startMapActivity(){	
 		Bundle bundle = getIntent().getExtras();
 		if( bundle == null || bundle.getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){

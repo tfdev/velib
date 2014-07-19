@@ -18,7 +18,7 @@ public class Contract implements Comparable<Contract>{
 	
 	
 	final static public String CONTRACT_PREFERENCE_KEY = "contract";
-	
+	final static public String SERVICE_PREFERENCE_KEY = "service";
 	
 	private String name;
 	private Country country;

@@ -5,18 +5,20 @@
     android:layout_height="match_parent" >
   
   	<RelativeLayout
-   		android:id="@+id/detail_layout"
+   		android:id="@+id/ok_bar"
    		android:layout_alignParentBottom="true"
 	    android:layout_width="fill_parent"
-	    android:layout_height="@dimen/detail_height"
+	    android:layout_height="@dimen/ok_bar_height"
 	    android:background="@drawable/top_border" >
     
     	<Button
 	        android:id="@+id/okButton"
 	        android:enabled="false"
+	        android:background="@drawable/selector_button"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentRight="true"
+	        android:layout_margin="10dp"
 	        android:text="@string/ok" />
     	
     </RelativeLayout>
@@ -45,8 +47,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/listHeader"
-        android:layout_above="@id/detail_layout"
-        android:listSelector="@android:color/darker_gray"
+        android:layout_above="@id/ok_bar"
+        android:listSelector="@color/highlighted_blue"
         android:choiceMode="singleChoice">
     </ListView>
     

@@ -18,4 +18,8 @@
 	<dimen name="buttons_size">30dp</dimen>
 	<dimen name="detail_height">50dp</dimen>
 	<dimen name="image_padding_top_bottom">11dp</dimen>
+	
+	<!-- contract screen -->
+	<dimen name="ok_bar_height">60dp</dimen>
+	
 </resources>

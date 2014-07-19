@@ -99,6 +99,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private boolean detailing = false;
 	private boolean centering = false;
 	private boolean onCreate = true;
+	private boolean showMessageIfNoStation;
 	
 	private int detailedStationNumber;
 	
@@ -148,6 +149,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
+        hideDetails();
     }
     
 	//-----------------  Instance Methods ------------------
@@ -196,9 +198,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void hideDetails() {
-		detailing = false;
-		setDetailViewVisible(false);
-		unhighlightMarker();
+		if(detailing){
+			detailing = false;
+			setDetailViewVisible(false);
+			unhighlightMarker();
+		}
 	}
 	
 	private void showDetails(Marker marker){	
@@ -338,7 +342,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			    Station station = stations.valueAt(i);
 			    Station stationOnMap = stationsOnMap.get(station.getNumber());
 			    // if station is visible
-	            if(bounds.contains(station.getPosition())){ 
+	            if(bounds.contains(station.getPosition())){
+	            	showMessageIfNoStation = false;
 	                if(stationOnMap == null){ //if there is no marker yet 
 	                	station.setMarker(addMarker(station, size));
 	                	stationsOnMap.put(station.getNumber(), station);             		
@@ -363,8 +368,22 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	                }
 	            }
 	        }
+			
+			showMessageIfNoStation();	
 	    }
 	}	
+	
+	private void showMessageIfNoStation(){
+		if(showMessageIfNoStation){
+			showMessageIfNoStation = false;
+			String service = getPreferredService();
+			String msg = getString(R.string.msg_no_station);
+			if(service != null)
+				msg= msg+" "+service;
+			msg= msg+" "+getString(R.string.msg_here);
+			showMessage(msg);
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	private void resetAllMarkers(){
@@ -420,6 +439,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
     			hideDetails();
+    			showMessageIfNoStation = true;
         		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
         		map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
@@ -477,6 +497,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	    return preferredContract;
 	}
 	
+	private String getPreferredService(){
+		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
+	    return settings.getString(Contract.SERVICE_PREFERENCE_KEY, null);
+	}
+	
 	private void startConfigActivity(boolean keepActivity){
 		Intent intent = new Intent(this, ContractListActivity.class);
 		if(keepActivity){
@@ -497,6 +522,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			if(resultCode == RESULT_OK){
 				StationManager.INSTANCE.getStationMap().clear();
 				resetAllMarkers();
+				showMessageIfNoStation = true;
 			}
 		}
 	}
