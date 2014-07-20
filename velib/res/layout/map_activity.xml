@@ -38,7 +38,7 @@
 	   	android:visibility="invisible"
 	    android:layout_width="fill_parent"
 	    android:layout_height="@dimen/detail_height"
-	    android:background="@drawable/bottom_border" >
+	    android:background="@drawable/bar_drawable" >
 
 	    <ImageView
 	        android:id="@+id/bike"

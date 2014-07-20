@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TODO finish me -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_enabled="true" android:drawable="@color/highlighted_blue"></item>
+    <item android:state_enabled="false" android:drawable="@color/light_gray"></item>
+</selector>

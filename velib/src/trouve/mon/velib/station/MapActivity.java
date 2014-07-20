@@ -99,7 +99,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private boolean detailing = false;
 	private boolean centering = false;
 	private boolean onCreate = true;
-	private boolean showMessageIfNoStation = false;
+	private boolean actionIfNoStation = false;
 	
 	private int detailedStationNumber;
 	
@@ -122,6 +122,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		retrieveExtraInfo();
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
@@ -153,6 +154,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     }
     
 	//-----------------  Instance Methods ------------------
+	
+	//TODO fixme
+	private void retrieveExtraInfo(){
+		Bundle bundle = getIntent().getExtras();
+		if( bundle != null && 
+			bundle.getInt(ContractListActivity.EXTRA_CODE) == ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY){
+			actionIfNoStation = true;
+		}
+	}
 	
     private void setUpResourceDelegate(){
     	if(delegate == null){
@@ -343,7 +353,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			    Station stationOnMap = stationsOnMap.get(station.getNumber());
 			    // if station is visible
 	            if(bounds.contains(station.getPosition())){
-	            	showMessageIfNoStation = false;
+	            	actionIfNoStation = false;
 	                if(stationOnMap == null){ //if there is no marker yet 
 	                	station.setMarker(addMarker(station, size));
 	                	stationsOnMap.put(station.getNumber(), station);             		
@@ -369,19 +379,14 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	            }
 	        }
 			
-			showMessageIfNoStation();	
+			goAwayIfNoStation();	
 	    }
 	}	
 	
-	private void showMessageIfNoStation(){
-		if(showMessageIfNoStation){
-			showMessageIfNoStation = false;
-			String service = getPreferredService();
-			String msg = getString(R.string.msg_no_station);
-			if(service != null)
-				msg= msg+" "+service;
-			msg= msg+" "+getString(R.string.msg_here);
-			showMessage(msg);
+	private void goAwayIfNoStation(){
+		if(actionIfNoStation){
+			actionIfNoStation = false;
+			centerMapFarAway();
 		}
 	}
 	
@@ -429,6 +434,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private boolean isGpsEnabled(){
     	 final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     	 return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+    
+    
+    private void centerMapFarAway(){
+    	SparseArray<Station> stations = StationManager.INSTANCE.getStationMap();
+    	if(stations.size() != 0){
+    		Station station = stations.valueAt(0);
+    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(station.getPosition(), TINY_ZOOM_LEVEL));
+    	}
     }
     
     private void centerMapOnMyLocation(boolean animateCamera){
@@ -499,10 +513,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	    return preferredContract;
 	}
 	
-	private String getPreferredService(){
+	/*private String getPreferredService(){
 		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
 	    return settings.getString(Contract.SERVICE_PREFERENCE_KEY, null);
-	}
+	}*/
 	
 	private void startConfigActivity(boolean keepActivity){
 		Intent intent = new Intent(this, ContractListActivity.class);
@@ -524,7 +538,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			if(resultCode == RESULT_OK){
 				StationManager.INSTANCE.getStationMap().clear();
 				resetAllMarkers();
-				showMessageIfNoStation = true;
+				actionIfNoStation = true;
 			}
 		}
 	}

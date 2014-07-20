@@ -18,6 +18,7 @@ import android.widget.TextView;
 public class ContractListActivity extends ListActivity {
 
 	public final static int REQUEST_CODE_USE_EXISTING_MAP = 11;
+	public final static int REQUEST_CODE_MOVE_AWAY_IF_EMPTY = 12;
 	public final static String EXTRA_CODE = "requestCode";
 	
 	
@@ -103,6 +104,7 @@ public class ContractListActivity extends ListActivity {
 		Bundle bundle = getIntent().getExtras();
 		if( bundle == null || bundle.getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){
 			Intent intent = new Intent(this, MapActivity.class);
+			intent.putExtra(ContractListActivity.EXTRA_CODE, ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY);
 			startActivity(intent);
 		}else{
 			Intent resultIntent = new Intent();

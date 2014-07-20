@@ -9,7 +9,7 @@
    		android:layout_alignParentBottom="true"
 	    android:layout_width="fill_parent"
 	    android:layout_height="@dimen/ok_bar_height"
-	    android:background="@drawable/top_border" >
+	    android:background="@drawable/bottom_bar_drawable" >
     
   	    <ImageButton 
 		    	 android:id="@+id/btn_refresh"
@@ -23,7 +23,7 @@
     	<Button
 	        android:id="@+id/okButton"
 	        android:enabled="false"
-	        android:background="@drawable/selector_button"
+	        android:background="@drawable/selector_btn_background"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentRight="true"
