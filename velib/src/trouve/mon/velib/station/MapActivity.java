@@ -18,6 +18,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -88,8 +91,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private GoogleMap map;
     private LocationClient locationClient;	
     
-	private View refreshButton;
-	private View configButton;
+    private Menu menu;
 	private Animation refreshButtonAnimation;
 	
 	private SparseArray<Station> visibleMarkers = new SparseArray<Station>(20);
@@ -107,6 +109,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	@SuppressWarnings("rawtypes")
 	private ScheduledFuture scheduledRefresh;
+	
+	private View locationButton;
 	
 	// Station Details
 	private View detailContainerView;
@@ -127,8 +131,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
-		setUpRefreshButton();
-		setUpConfigButton();
 		setUpStationDetailView();
 	}
 	
@@ -153,6 +155,34 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         }
         hideDetails();
     }
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		this.menu = menu;
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.map_activity_actions, menu);
+	    menu.findItem(R.id.action_refresh).getActionView().setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				startRefresh();
+			}
+		}); 
+	    return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_refresh:
+	            startRefresh();
+	            return true;
+	        case R.id.action_settings:
+	        	startConfigActivity(true);
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
     
 	//-----------------  Instance Methods ------------------
 	
@@ -170,29 +200,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     		delegate = new ResourceDelegate(getResources());
     	}
     }
-	
-    private void setUpConfigButton() {
-		configButton = findViewById(R.id.btn_config);
-		configButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				startConfigActivity(true);
-			}
-		});
-	}
     
-	private void setUpRefreshButton(){
-		refreshButton = findViewById(R.id.btn_refresh);
-		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
-		refreshButtonAnimation.setRepeatCount(Animation.INFINITE);
-		
-		refreshButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				if(!refreshing){
-					refreshing = true;
-					scheduleUpdateData();
-				}
-			}
-		});
+	private void startRefresh(){
+		if(!refreshing){
+			refreshing = true;
+			scheduleUpdateData();
+		}
 	}
 	
 	private void setUpStationDetailView(){
@@ -206,6 +219,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		stationTextView = (TextView) findViewById(R.id.station_info);
 		bikeImageView = (ImageView) findViewById(R.id.bike);
 		standImageView = (ImageView) findViewById(R.id.parking);
+		
+		int color = getResources().getColor(R.color.logo_blue);
+		bikeTextView.setTextColor(color);
+		bikeImageView.setColorFilter(color);
+		standTextView.setTextColor(color);
+		standImageView.setColorFilter(color);
 	}
 	
 	private void hideDetails() {
@@ -246,76 +265,52 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		bikeTextView.setText(String.valueOf(bikes));
 		standTextView.setText(String.valueOf(stands));
 		
-		int color;
-		if(bikes == 0){
-			color = ResourceDelegate.RED;
-		}else if(bikes <= 3){
-			color = ResourceDelegate.ORANGE;
-		}else{
-			color = ResourceDelegate.GREEN;
-		}
-		bikeTextView.setTextColor(color);
-		bikeImageView.setColorFilter(color);
-		if(stands == 0){
-			color = ResourceDelegate.RED;
-		}else if(stands <= 3){
-			color = ResourceDelegate.ORANGE;
-		}else{
-			color = ResourceDelegate.GREEN;
-		}
-		standTextView.setTextColor(color);
-		standImageView.setColorFilter(color);
-		
 		stationTextView.setText(String.valueOf(station.getFormattedName()));
 	}
 	
-	
-	// Animate view to disappear sliding out from bottom to top
-	public void slideToTop(View view){
-		TranslateAnimation animate = new TranslateAnimation(0,0,0,-view.getHeight());
-		animate.setDuration(500);
-		animate.setFillAfter(true);
-		view.startAnimation(animate);
-		view.setVisibility(View.GONE);
-	}
-	
-	// Animate view to appear sliding out from top to bottom
-	public void slideToBottom(View view){
-		if(view.getVisibility() != View.VISIBLE){
-			TranslateAnimation animate = new TranslateAnimation(0,0,- view.getHeight(), 0);
+	public void slideToTop(View view) {
+		if (view.getVisibility() != View.VISIBLE) {
+			TranslateAnimation animate = new TranslateAnimation(0, 0, view.getHeight(), 0);
 			animate.setDuration(500);
-			animate.setFillAfter(true);
+			//animate.setFillAfter(true);
 			view.startAnimation(animate);
 			view.setVisibility(View.VISIBLE);
 		}
 	}
+
+	public void slideToBottom(View view) {
+		TranslateAnimation animate = new TranslateAnimation(0, 0, 0, view.getHeight());
+		animate.setDuration(500);
+		view.startAnimation(animate);
+		view.setVisibility(View.GONE);
+	}
 	
 	private void setDetailViewVisible(boolean visible){
-		int refreshNormalSize = getResources().getDimensionPixelSize(R.dimen.refresh_top_margin_standard);	
-		int configNormalSize = getResources().getDimensionPixelSize(R.dimen.config_top_margin_standard);	
-		
-		RelativeLayout.LayoutParams refreshLayoutParams = (RelativeLayout.LayoutParams) refreshButton.getLayoutParams();
-		RelativeLayout.LayoutParams configLayoutParams = (RelativeLayout.LayoutParams) configButton.getLayoutParams();
-		
+		moveMyLocationButton(visible);
 		if(visible){
-			slideToBottom(detailContainerView);
-			int detailSize = getResources().getDimensionPixelSize(R.dimen.detail_height);
-			refreshLayoutParams.topMargin = detailSize + refreshNormalSize;
-			configLayoutParams.topMargin = detailSize + configNormalSize;
-		}else{
 			slideToTop(detailContainerView);
-			refreshLayoutParams.topMargin =  refreshNormalSize;
-			configLayoutParams.topMargin = configNormalSize;
+		}else{
+			slideToBottom(detailContainerView);
 		}
-		refreshButton.setLayoutParams(refreshLayoutParams);
-		configButton.setLayoutParams(configLayoutParams);
+	}
+	
+	private void moveMyLocationButton(boolean detailViewVisible) {  
+	    try{
+		    RelativeLayout.LayoutParams relativeLayoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+		    int detailSize = detailViewVisible ? getResources().getDimensionPixelSize(R.dimen.detail_height) : 0;
+		    relativeLayoutParams.bottomMargin = 30 + detailSize;
+		    locationButton.setLayoutParams(relativeLayoutParams);
+	    }
+	    catch(Exception e){
+	    	Log.e(TAG, "not able to move myLocation button", e);
+	    }
 	}
 	
 	private void horribleHackToMoveMyLocationButton() {
 	    View mapView = findViewById(R.id.map);
 	    try{
 		    // Get the button view 
-		    View locationButton = ((View) mapView.findViewById(1).getParent()).findViewById(2);
+		    locationButton = ((View) mapView.findViewById(1).getParent()).findViewById(2);
 		    // and next place it, for example, on bottom right (as Google Maps app)
 		    RelativeLayout.LayoutParams relativeLayoutParams = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 		    // position on right bottom
@@ -512,11 +507,22 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
     public void showRefreshing(){
     	refreshing = true;
-		refreshButton.startAnimation(refreshButtonAnimation);
+    	if(menu != null){
+	        MenuItem item = menu.findItem(R.id.action_refresh);
+
+        	if(refreshButtonAnimation == null){
+        		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
+        		refreshButtonAnimation.setRepeatCount(Animation.INFINITE);
+        	}
+        	item.getActionView().startAnimation(refreshButtonAnimation);
+    	}
     }
     public void stopRefreshing(){
     	refreshing = false;
-		refreshButton.clearAnimation();
+        MenuItem item = menu.findItem(R.id.action_refresh);
+        if(item.getActionView() != null){
+        	item.getActionView().clearAnimation();
+        }    
     }
     
 	private void scheduleUpdateData(){

@@ -5,12 +5,12 @@
         <solid android:color="#ff888888" />
     </shape>
 </item>
-<item android:top="1dp">
+<item android:bottom="1dp">
     <shape android:shape="rectangle">
         <gradient 
-            android:startColor="#fff0f8ff" 
+            android:startColor="@color/logo_blue_light" 
             
-            android:endColor="#ffcccccc"
+            android:endColor="@color/logo_blue"
             android:angle="270"/>
     </shape>
 </item>

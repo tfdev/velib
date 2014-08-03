@@ -6,35 +6,10 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="match_parent">
     
-   	<RelativeLayout	android:layout_width="fill_parent"
-				    android:layout_height="fill_parent">
-
-		<ImageButton 
-		    	 android:id="@+id/btn_refresh" 
-		    	 android:alpha="0.9"
-	    		 android:background="@drawable/ic_action_refresh"
-	    		 android:layout_alignParentRight="true"
-	    		 android:layout_alignParentTop="true"
-	    		 android:layout_marginRight="10dp"
-	    		 android:layout_marginTop="@dimen/refresh_top_margin_standard"
-				 android:layout_height="@dimen/buttons_size"
-				 android:layout_width="@dimen/buttons_size"/>  
-				 
-		<ImageButton 
-		    	 android:id="@+id/btn_config" 
-		    	 android:alpha="0.9"
-	    		 android:background="@drawable/ic_action_settings"
-	    		 android:layout_alignParentRight="true"
-	    		 android:layout_alignParentTop="true"
-	    		 android:layout_marginRight="10dp"
-	    		 android:layout_marginTop="@dimen/config_top_margin_standard"
-				 android:layout_height="@dimen/buttons_size"
-				 android:layout_width="@dimen/buttons_size"/>
-
-	</RelativeLayout>
 	
    	<RelativeLayout
    		android:id="@+id/detail_layout"
+   		android:layout_gravity="bottom"
 	   	android:visibility="invisible"
 	    android:layout_width="fill_parent"
 	    android:layout_height="@dimen/detail_height"

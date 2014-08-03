@@ -21,4 +21,9 @@
     
 	<string name="select_city">Sélectionnez votre ville</string>
 	
+	<!-- Actions -->
+	
+	<string name="action_settings">Préférences</string>
+	<string name="action_refresh">Rafraîchir</string>
+	
 </resources>
