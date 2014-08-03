@@ -21,6 +21,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -268,6 +269,27 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		stationTextView.setText(String.valueOf(station.getFormattedName()));
 	}
 	
+	
+	// Animate view to disappear sliding out from bottom to top
+	public void slideToTop(View view){
+		TranslateAnimation animate = new TranslateAnimation(0,0,0,-view.getHeight());
+		animate.setDuration(500);
+		animate.setFillAfter(true);
+		view.startAnimation(animate);
+		view.setVisibility(View.GONE);
+	}
+	
+	// Animate view to appear sliding out from top to bottom
+	public void slideToBottom(View view){
+		if(view.getVisibility() != View.VISIBLE){
+			TranslateAnimation animate = new TranslateAnimation(0,0,- view.getHeight(), 0);
+			animate.setDuration(500);
+			animate.setFillAfter(true);
+			view.startAnimation(animate);
+			view.setVisibility(View.VISIBLE);
+		}
+	}
+	
 	private void setDetailViewVisible(boolean visible){
 		int refreshNormalSize = getResources().getDimensionPixelSize(R.dimen.refresh_top_margin_standard);	
 		int configNormalSize = getResources().getDimensionPixelSize(R.dimen.config_top_margin_standard);	
@@ -276,12 +298,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		RelativeLayout.LayoutParams configLayoutParams = (RelativeLayout.LayoutParams) configButton.getLayoutParams();
 		
 		if(visible){
-			detailContainerView.setVisibility(View.VISIBLE);
+			slideToBottom(detailContainerView);
 			int detailSize = getResources().getDimensionPixelSize(R.dimen.detail_height);
 			refreshLayoutParams.topMargin = detailSize + refreshNormalSize;
 			configLayoutParams.topMargin = detailSize + configNormalSize;
 		}else{
-			detailContainerView.setVisibility(View.GONE);
+			slideToTop(detailContainerView);
 			refreshLayoutParams.topMargin =  refreshNormalSize;
 			configLayoutParams.topMargin = configNormalSize;
 		}
