@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   		android:id="@+id/detail_layout"
+   		android:layout_gravity="bottom"
+	    android:layout_width="fill_parent"
+	    android:layout_height="@dimen/detail_height"
+	    android:background="@drawable/bar_drawable" >
+
+	    <ImageView
+	        android:id="@+id/bike"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:adjustViewBounds="true"
+	        android:layout_alignParentLeft="true"
+	        android:src="@drawable/ic_launcher" />
+	
+	    <TextView
+	        android:id="@+id/bike_number"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="30sp"
+	        android:text="xx"
+	        android:layout_toRightOf="@id/bike"/>
+	
+	    <ImageView
+	        android:id="@+id/parking"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:adjustViewBounds="true"
+	        android:layout_below="@id/bike"
+	        android:src="@drawable/ic_parking" />
+	    
+	    <TextView
+	        android:id="@+id/parking_number"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_toRightOf="@id/parking"
+	        android:layout_below="@id/bike_number"
+	        android:text="xx"
+	        android:textSize="30sp" />
+ 	    
+	   	<TextView
+	        android:id="@+id/station_info"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerInParent="true"
+	        
+	        android:layout_toRightOf="@id/bike_number"
+	        android:paddingLeft="10dp"
+	        android:paddingRight="10dp"
+	        android:gravity="center"
+	        android:textColor="#4a4a4a"
+	        android:textSize="20sp"
+	        android:maxLines="2"
+	        android:textStyle="italic"
+   	    	android:typeface="sans"  />
+
+	</RelativeLayout>
+  		

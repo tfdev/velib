@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
@@ -209,7 +210,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void setUpStationDetailView(){
+		getLayoutInflater().inflate(R.layout.detail_bar, (ViewGroup) findViewById(R.id.map));
 		detailContainerView = findViewById(R.id.detail_layout);
+		detailContainerView.setVisibility(View.INVISIBLE);
 		detailContainerView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {}
 		});
@@ -272,7 +275,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		if (view.getVisibility() != View.VISIBLE) {
 			TranslateAnimation animate = new TranslateAnimation(0, 0, view.getHeight(), 0);
 			animate.setDuration(500);
-			//animate.setFillAfter(true);
 			view.startAnimation(animate);
 			view.setVisibility(View.VISIBLE);
 		}
