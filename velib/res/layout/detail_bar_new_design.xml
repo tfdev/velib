@@ -12,44 +12,49 @@
 	        android:layout_width="40dp"
 	        android:layout_height="40dp"
 	        android:adjustViewBounds="true"
-	        android:layout_alignParentLeft="true"
-	        android:src="@drawable/ic_launcher" />
+	        android:layout_alignParentRight="true"
+	        android:layout_marginRight="4dp"
+	        android:src="@drawable/ic_bike" />
 	
 	    <TextView
 	        android:id="@+id/bike_number"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
 	        android:textSize="30sp"
 	        android:text="xx"
-	        android:layout_toRightOf="@id/bike"/>
+	        android:gravity="center"
+	        android:layout_toLeftOf="@id/bike" />
 	
 	    <ImageView
 	        android:id="@+id/parking"
 	        android:layout_width="40dp"
 	        android:layout_height="40dp"
 	        android:adjustViewBounds="true"
+	        android:padding="4dp"
+	        android:layout_marginRight="4dp"
 	        android:layout_below="@id/bike"
+	        android:layout_alignParentRight="true"
 	        android:src="@drawable/ic_parking" />
 	    
 	    <TextView
 	        android:id="@+id/parking_number"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_toRightOf="@id/parking"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+	        android:layout_toLeftOf="@id/parking"
 	        android:layout_below="@id/bike_number"
-	        android:text="xx"
+	        android:text="x"
+	        android:gravity="center"
 	        android:textSize="30sp" />
  	    
 	   	<TextView
 	        android:id="@+id/station_info"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_centerInParent="true"
-	        
-	        android:layout_toRightOf="@id/bike_number"
-	        android:paddingLeft="10dp"
-	        android:paddingRight="10dp"
-	        android:gravity="center"
+	        android:layout_centerVertical="true"
+	        android:layout_marginLeft="20dp"
+	        android:layout_marginRight="90dp"
+			android:text="Place du bataillon Français de l'ONU"
+	        android:gravity="left"
 	        android:textColor="#4a4a4a"
 	        android:textSize="20sp"
 	        android:maxLines="2"

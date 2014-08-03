@@ -210,7 +210,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void setUpStationDetailView(){
-		getLayoutInflater().inflate(R.layout.detail_bar, (ViewGroup) findViewById(R.id.map));
+		getLayoutInflater().inflate(R.layout.detail_bar_new_design, (ViewGroup) findViewById(R.id.map));
 		detailContainerView = findViewById(R.id.detail_layout);
 		detailContainerView.setVisibility(View.INVISIBLE);
 		detailContainerView.setOnClickListener(new View.OnClickListener() {
