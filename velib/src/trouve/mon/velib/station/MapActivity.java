@@ -115,6 +115,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	// Station Details
 	private View detailContainerView;
+	private TextView distanceTextView;
 	private TextView bikeTextView;
 	private TextView standTextView;
 	private TextView stationTextView;
@@ -217,6 +218,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			public void onClick(View v) {}
 		});
 		
+		distanceTextView = (TextView) findViewById(R.id.distance);
 		bikeTextView = (TextView) findViewById(R.id.bike_number);
 		standTextView = (TextView) findViewById(R.id.parking_number);
 		stationTextView = (TextView) findViewById(R.id.station_info);
@@ -261,12 +263,23 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		map.animateCamera(CameraUpdateFactory.newLatLng(station.getPosition()), 500, null);
 	}
 	
+	private void formatDistance(Station station){
+		String distanceString = "";
+		int distance = distanceFromLastLocation(station);
+		if(distance != 0){
+			distanceString = String.format("%d", distance)+ getString(R.string.meter);
+		}
+		distanceTextView.setText(distanceString);
+	}
+	
 	private void updateDetailInfo(Station station) {
 		int bikes = station.getAvailableBikes();
 		int stands = station.getAvailableBikeStands();
 		
 		bikeTextView.setText(String.valueOf(bikes));
 		standTextView.setText(String.valueOf(stands));
+		
+		formatDistance(station);
 		
 		stationTextView.setText(String.valueOf(station.getFormattedName()));
 	}
@@ -462,6 +475,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     		Station station = stations.valueAt(0);
     		map.animateCamera(CameraUpdateFactory.newLatLngZoom(station.getPosition(), TINY_ZOOM_LEVEL));
     	}
+    }
+    
+	private int distanceFromLastLocation(Station station){
+    	if(locationClient != null){
+    		Location lastLocation = locationClient.getLastLocation();
+    		if(lastLocation != null){
+    			LatLng latLng = station.getPosition();
+    			float[] results = new float[1];
+    			Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), 
+    					latLng.latitude, latLng.longitude, results);
+    			return Math.round(results[0]);
+    		}
+    	}
+    	return 0;
     }
     
     private void centerMapOnMyLocation(boolean animateCamera){

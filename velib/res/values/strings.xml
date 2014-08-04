@@ -5,6 +5,9 @@
     
     <string name="ok">Enregistrer</string>
     
+    <string name="meter">m</string>
+    <string name="kilometer">km</string>
+    
     <!-- Message -->
     
 	<string name="msg_no_gps">Connexion GPS impossible</string>
@@ -25,5 +28,6 @@
 	
 	<string name="action_settings">Préférences</string>
 	<string name="action_refresh">Rafraîchir</string>
+	<string name="action_favorite">Favoris</string>
 	
 </resources>
