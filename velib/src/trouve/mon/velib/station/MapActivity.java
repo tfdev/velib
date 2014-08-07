@@ -121,7 +121,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private TextView stationTextView;
 	private ImageView bikeImageView;
 	private ImageView standImageView;
-
+	private ImageView favImageView;
 	
 	
 	//-----------------  Activity Lifecycle ------------------
@@ -129,6 +129,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		loadFavorites();
 		retrieveExtraInfo();
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
@@ -224,6 +225,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		stationTextView = (TextView) findViewById(R.id.station_info);
 		bikeImageView = (ImageView) findViewById(R.id.bike);
 		standImageView = (ImageView) findViewById(R.id.parking);
+		favImageView = (ImageView) findViewById(R.id.favorite);
+		favImageView.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Station station = StationManager.INSTANCE.get(detailedStationNumber);
+				setFavorite(station, !station.isFavorite());
+				setFavImageOnDetailView(station);
+			}
+		});
 		
 		int color = getResources().getColor(R.color.logo_blue);
 		bikeTextView.setTextColor(color);
@@ -240,12 +250,20 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		}
 	}
 	
+	private void setFavImageOnDetailView(Station station){
+		if(station.isFavorite())
+			favImageView.setImageResource(R.drawable.ic_fav);
+		else
+			favImageView.setImageResource(R.drawable.ic_action_not_important);			
+	}
+	
 	private void showDetails(Marker marker){	
 		detailing = true;
 		int stationNumber = Integer.parseInt(marker.getTitle());
 		detailedStationNumber = stationNumber;
 		
 		Station station = StationManager.INSTANCE.get(stationNumber);
+		setFavImageOnDetailView(station);
 		centerMap(station);
 		updateDetailInfo(station);
 		setDetailViewVisible(true);
@@ -570,10 +588,44 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	    return preferredContract;
 	}
 	
-	/*private String getPreferredService(){
-		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
-	    return settings.getString(Contract.SERVICE_PREFERENCE_KEY, null);
-	}*/
+	public void setFavorite(Station station, boolean isFavorite){
+		station.setFavorite(isFavorite);
+		updateMarker(station);
+		SharedPreferences.Editor editor = getFavoriteSharedPreferences().edit();
+		if(isFavorite){
+			editor.putBoolean(String.valueOf(station.getNumber()), true);
+		}else{
+			editor.remove(String.valueOf(station.getNumber()));
+		}
+		editor.apply();
+	}
+	
+	private void updateMarker(Station station){
+		MarkerSize size = null;
+		if (map.getCameraPosition().zoom > MID_ZOOM_LEVEL) {
+			size = MarkerSize.BIG;
+		} else if (map.getCameraPosition().zoom > TINY_ZOOM_LEVEL) {
+			size = MarkerSize.MID;
+		} else if (map.getCameraPosition().zoom > MAX_ZOOM_LEVEL) {
+			size = MarkerSize.TINY;
+		}
+
+		if (size != null) {
+			station.getMarker().remove();
+			station.setMarker(addMarker(station, size));
+		}
+	}
+	
+	// Needs to be called from onCreate()
+	// before any station has been loaded
+	private void loadFavorites(){
+		StationManager.INSTANCE.setFavorites(getFavoriteSharedPreferences().getAll());
+	}
+	
+	public SharedPreferences getFavoriteSharedPreferences(){
+	    return getSharedPreferences(Station.KEY_FAVORITE, MODE_PRIVATE);
+	}
+	
 	
 	private void startConfigActivity(boolean keepActivity){
 		Intent intent = new Intent(this, ContractListActivity.class);

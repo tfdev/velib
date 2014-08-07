@@ -14,6 +14,9 @@ public class Station {
 	
 	private static final String TAG = Station.class.getName();
 
+	public static final String KEY_FAVORITE = "FAVORITES";
+	
+	
 	//----------------- Class methods -----------------
 	
 	//TODO find something i18n compliant
@@ -33,6 +36,8 @@ public class Station {
 	
 	
 	//----------------- Instance Fields ------------------
+	
+	private boolean favorite;
 	
 	private int number;
 	private String name;
@@ -151,4 +156,11 @@ public class Station {
 								 || (station.getAvailableBikeStands() != availableBikeStands);
 	}
 	
+	public boolean isFavorite() {
+		return favorite;
+	}
+
+	public void setFavorite(boolean favorite) {
+		this.favorite = favorite;
+	}
 }

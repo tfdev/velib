@@ -26,6 +26,12 @@ public class ResourceDelegate {
 	
 	private Resources resources;
 	
+	private Bitmap markerGreenFav;
+	private Bitmap markerOrangeFav;
+	private BitmapDescriptor markerRedFav;
+	private BitmapDescriptor markerMidFav;
+	private BitmapDescriptor markerTinyFav;
+	
 	private Bitmap markerGreen;
 	private Bitmap markerOrange;
 	private BitmapDescriptor markerRed;
@@ -36,6 +42,8 @@ public class ResourceDelegate {
 	private BitmapDescriptor markerOrangeTiny;
 	private BitmapDescriptor markerRedTiny;
 	
+	private BitmapDescriptor fav;
+	
 	//-----------------  Instance Methods ------------------
 	
 	public ResourceDelegate(Resources resources) {
@@ -44,6 +52,14 @@ public class ResourceDelegate {
 
 	private Resources getResources() {
 		return resources;
+	}
+	
+	public BitmapDescriptor getFav() {
+		if(fav == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_important, null);
+			fav = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return fav;
 	}
 	
 	public BitmapDescriptor getMarkerGreenMid() {
@@ -104,17 +120,54 @@ public class ResourceDelegate {
 		if(markerRed == null){
 			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_red, null)
 									.copy(Bitmap.Config.ARGB_8888, true);
-			Canvas canvas = new Canvas(bitmap);		
-			Paint textPaint = new Paint();
-			textPaint.setTextAlign(Paint.Align.CENTER);
-			textPaint.setTextSize(getBigTextSize());
-			textPaint.setTypeface(Typeface.DEFAULT_BOLD);
-			textPaint.setColor(RED);
-			canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
-
-			markerRed = BitmapDescriptorFactory.fromBitmap(bitmap);
+			markerRed = getMarkerRed(bitmap);
 		}
 		return markerRed;
+	}
+	public Bitmap getMarkerGreenFav() {
+		if(markerGreenFav == null){
+			markerGreenFav = BitmapFactory.decodeResource(getResources(), R.drawable.fav_marker_green, null);
+		}
+		return markerGreenFav;
+	}
+	public Bitmap getMarkerOrangeFav() {
+		if(markerOrangeFav == null){
+			markerOrangeFav = BitmapFactory.decodeResource(getResources(), R.drawable.fav_marker_orange, null);
+		}
+		return markerOrangeFav;
+	}
+	private BitmapDescriptor getMarkerRed(Bitmap bitmap){
+		Canvas canvas = new Canvas(bitmap);		
+		Paint textPaint = new Paint();
+		textPaint.setTextAlign(Paint.Align.CENTER);
+		textPaint.setTextSize(getBigTextSize());
+		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		textPaint.setColor(RED);
+		canvas.drawText("0", bitmap.getWidth()/2, bitmap.getHeight()/2 - getCenterClosed(), textPaint);
+
+		return BitmapDescriptorFactory.fromBitmap(bitmap);
+	}
+	public BitmapDescriptor getMarkerRedFavBitmapDescriptor() {
+		if(markerRedFav == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fav_marker_red, null)
+									.copy(Bitmap.Config.ARGB_8888, true);
+			markerRedFav = getMarkerRed(bitmap);
+		}
+		return markerRedFav;
+	}
+	public BitmapDescriptor getMarkerMidFav() {
+		if(markerMidFav == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fav_marker_mid, null);
+			markerMidFav = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerMidFav;
+	}
+	public BitmapDescriptor getMarkerTinyFav() {
+		if(markerTinyFav == null){
+			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fav_marker_tiny, null);
+			markerTinyFav = BitmapDescriptorFactory.fromBitmap(bitmap);
+		}
+		return markerTinyFav;
 	}
 	private int getCenterClosed(){
 		return getResources().getDimensionPixelSize(R.dimen.center_closed);
@@ -131,14 +184,22 @@ public class ResourceDelegate {
 	private int getCenterBike(){
 		return getResources().getDimensionPixelSize(R.dimen.center_bike);
 	}
-	public BitmapDescriptor getOpenMarkerBitmapDescriptor(int bikes, int stands) {
-		int color;
+	public BitmapDescriptor getOpenMarkerBitmapDescriptor(Station station) {
+		int color,
+			bikes = station.getAvailableBikes(),
+			stands = station.getAvailableBikeStands();
 		Bitmap bitmap = null;
 		if (bikes <= 3 || stands <= 3){
-			bitmap = getMarkerOrange().copy(Bitmap.Config.ARGB_8888, true);
+			if(station.isFavorite())
+				bitmap = getMarkerOrangeFav().copy(Bitmap.Config.ARGB_8888, true);
+			else
+				bitmap = getMarkerOrange().copy(Bitmap.Config.ARGB_8888, true);
 			color = ORANGE;
 		}else{
-			bitmap = getMarkerGreen().copy(Bitmap.Config.ARGB_8888, true);
+			if(station.isFavorite())
+				bitmap = getMarkerGreenFav().copy(Bitmap.Config.ARGB_8888, true);
+			else
+				bitmap = getMarkerGreen().copy(Bitmap.Config.ARGB_8888, true);
 			color = GREEN;
 		}
 
@@ -156,7 +217,10 @@ public class ResourceDelegate {
 	public BitmapDescriptor getTinyMarkerBitmapDescriptor(Station station) {
 		int bikes = station.getAvailableBikes(), 
 				stands=	station.getAvailableBikeStands();
-		if(bikes == 0 && stands == 0){
+		if(station.isFavorite()){
+			return getMarkerTinyFav();
+		}
+		else if(bikes == 0 && stands == 0){
 			return getMarkerRedTiny();
 		}else if (bikes <= 3 || stands <= 3){
 			return getMarkerOrangeTiny();
@@ -167,7 +231,10 @@ public class ResourceDelegate {
 	public BitmapDescriptor getMidMarkerBitmapDescriptor(Station station) {
 		int bikes = station.getAvailableBikes(), 
 			stands=	station.getAvailableBikeStands();
-		if(bikes == 0 && stands == 0){
+		if(station.isFavorite()){
+			return getMarkerMidFav();
+		}
+		else if(bikes == 0 && stands == 0){
 			return getMarkerRedMid();
 		}else if (bikes <= 3 || stands <= 3){
 			return getMarkerOrangeMid();
@@ -177,9 +244,11 @@ public class ResourceDelegate {
 	}
 	public BitmapDescriptor getBigMarkerBitmapDescriptor(Station station) {								            
     	if(station.getStatus() == Status.OPEN){
-    		return getOpenMarkerBitmapDescriptor(station.getAvailableBikes(), station.getAvailableBikeStands());
+    		return getOpenMarkerBitmapDescriptor(station);
+    	}else if(station.isFavorite()){
+    			return getMarkerRedFavBitmapDescriptor();
     	}else{
-		    return getMarkerRedBitmapDescriptor();
+    			return getMarkerRedBitmapDescriptor();
     	}
 	}
     
