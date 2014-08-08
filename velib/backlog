@@ -1,0 +1,25 @@
+********** Features *********
+
+-> Error Bar instead of Toast message
+
+-> Fragments
+
+-> List of Favorites
+
+-> List of closest stations
+
+-> Formatter kilometer & name
+
+-> show Refresh in ActionBar
+
+*********** Design **********
+
+
+
+
+******* Known bugs **********
+ 
+-> Bug fix for go away at first launch
+
+-> Bug fix for favorite id
+

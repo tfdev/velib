@@ -7,11 +7,14 @@
 </item>
 <item android:top="1dp">
     <shape android:shape="rectangle">
-        <gradient 
+        
+        <solid android:color="#fff0f8ff" />
+        
+        <!--  gradient 
             android:startColor="#fff0f8ff" 
-            
             android:endColor="#ffcccccc"
-            android:angle="270"/>
+            android:gradientRadius="600"
+    		android:type="radial"/-->
     </shape>
 </item>
 </layer-list>

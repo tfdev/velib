@@ -13,7 +13,7 @@
 	        android:layout_height="wrap_content"
 	        android:src="@drawable/ic_fav"
 	        android:paddingTop="6dp"
-	        android:layout_marginLeft="4dp"
+	        android:layout_marginLeft="10dp"
 	        android:layout_centerVertical="true"/>
     
     	<TextView
@@ -23,7 +23,7 @@
 	        android:layout_alignParentLeft="true"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginTop="6dp"
-	        android:layout_marginLeft="40dp"
+	        android:layout_marginLeft="46dp"
 	        android:textSize="14sp"
 	        android:textStyle="italic"
 	        android:textColor="@color/logo_blue"
@@ -32,10 +32,11 @@
 	    <ImageView
 	        android:id="@+id/bike"
 	        android:layout_width="40dp"
-	        android:layout_height="45dp"
+	        android:layout_height="40dp"
+	        android:paddingTop="4dp"
 	        android:adjustViewBounds="true"
 	        android:layout_alignParentRight="true"
-	        android:layout_marginRight="4dp"
+	        android:layout_marginRight="10dp"
 	        android:src="@drawable/ic_bike" />
 	
 	    <TextView
@@ -54,8 +55,9 @@
 	        android:layout_width="40dp"
 	        android:layout_height="40dp"
 	        android:adjustViewBounds="true"
-	        android:paddingBottom="4dp"
-	        android:layout_marginRight="4dp"
+	        android:paddingBottom="6dp"
+	        android:paddingTop="4dp"
+	        android:layout_marginRight="10dp"
 	        android:layout_marginBottom="6dp"
 	        android:layout_below="@id/bike"
 	        android:layout_alignParentRight="true"
@@ -77,8 +79,8 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_centerVertical="true"
-	        android:layout_marginLeft="40dp"
-	        android:layout_marginRight="70dp"
+	        android:layout_marginLeft="46dp"
+	        android:layout_marginRight="82dp"
 			android:text="Place du bataillon Français de l'ONU"
 			android:paddingTop="6dp"
 	        android:gravity="left"

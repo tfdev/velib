@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.PixelFormat;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
@@ -187,6 +189,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	    }
 	}
     
+	@Override
+	public void onAttachedToWindow() {
+	    super.onAttachedToWindow();
+	    Window window = getWindow();
+	    window.setFormat(PixelFormat.RGBA_8888);
+	}
 	//-----------------  Instance Methods ------------------
 	
 	//TODO fixme
@@ -623,6 +631,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	public SharedPreferences getFavoriteSharedPreferences(){
+		// TODO favorite needs to contract specific
+		// key needs to include the contract
+		
 	    return getSharedPreferences(Station.KEY_FAVORITE, MODE_PRIVATE);
 	}
 	
