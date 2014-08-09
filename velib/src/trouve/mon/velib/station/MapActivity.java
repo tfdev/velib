@@ -9,6 +9,7 @@ import trouve.mon.velib.R;
 import trouve.mon.velib.ResourceDelegate;
 import trouve.mon.velib.contract.Contract;
 import trouve.mon.velib.contract.ContractListActivity;
+import trouve.mon.velib.util.Formatter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -74,7 +75,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	private static final String TAG = MapActivity.class.getName();
 	
-	private static final float HIGHLIGHT_ALPHA = 0.5f;
+	private static final float HIGHLIGHT_ALPHA = 0.4f;
 	private static final float NORMAL_ALPHA = 1.0f;
 	
 	private static final float CENTER_ZOOM_LEVEL = 15.5f;
@@ -254,7 +255,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		if(detailing){
 			detailing = false;
 			setDetailViewVisible(false);
-			unhighlightMarker();
+			Station station = StationManager.INSTANCE.get(detailedStationNumber);
+			unhighlightMarker(station);
 		}
 	}
 	
@@ -266,6 +268,10 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void showDetails(Marker marker){	
+		if(detailing){
+			Station oldStation = StationManager.INSTANCE.get(detailedStationNumber);
+			resetToNormalMarker(oldStation);
+		}
 		detailing = true;
 		int stationNumber = Integer.parseInt(marker.getTitle());
 		detailedStationNumber = stationNumber;
@@ -275,7 +281,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		centerMap(station);
 		updateDetailInfo(station);
 		setDetailViewVisible(true);
-		highlightMarker(marker);
+		highlightMarker(station);
 	}
 	
 	public void refreshDetails(){
@@ -289,13 +295,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		map.animateCamera(CameraUpdateFactory.newLatLng(station.getPosition()), 500, null);
 	}
 	
-	private void formatDistance(Station station){
-		String distanceString = "";
+	private void displayDistanceDetail(Station station){
 		int distance = distanceFromLastLocation(station);
-		if(distance != 0){
-			distanceString = String.format("%d", distance)+ getString(R.string.meter);
-		}
-		distanceTextView.setText(distanceString);
+		distanceTextView.setText(Formatter.formatDistance(distance, this));
 	}
 	
 	private void updateDetailInfo(Station station) {
@@ -305,7 +307,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		bikeTextView.setText(String.valueOf(bikes));
 		standTextView.setText(String.valueOf(stands));
 		
-		formatDistance(station);
+		displayDistanceDetail(station);
 		
 		stationTextView.setText(String.valueOf(station.getFormattedName()));
 	}
@@ -418,7 +420,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	                }else if(forceRefresh){ //else if data have just been updated
 	                	if(stationOnMap.isDifferent(station)){
 		                	stationOnMap.getMarker().remove();
-		                	station.setMarker(addMarker(station, size));
+		                	if(detailing && station.getNumber() == detailedStationNumber){
+		                		station.setMarker(addMarker(station, MarkerSize.BIG));
+		                	}else{
+		                		station.setMarker(addMarker(station, size));	
+		                	}
 		                	stationsOnMap.put(station.getNumber(), station); 
 	                	}else{
 	                		station.setMarker(stationOnMap.getMarker());
@@ -541,17 +547,39 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
 	
-	private void highlightMarker(Marker marker){	
+	private void highlightMarker(Station station){	
+		Marker marker = station.getMarker();
+		if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
+			marker.remove();
+        	station.setMarker(addMarker(station, MarkerSize.BIG));
+		}
+		
 		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
 		    visibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
 			midVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
 			tinyVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
-		marker.setAlpha(NORMAL_ALPHA);
+		station.getMarker().setAlpha(NORMAL_ALPHA);
 	}
 	
-	private void unhighlightMarker(){	
+	private void resetToNormalMarker(Station station){
+		Marker marker = station.getMarker();
+		if(map.getCameraPosition().zoom > MID_ZOOM_LEVEL){
+			marker.remove();
+        	station.setMarker(addMarker(station, MarkerSize.BIG));
+		}else if(map.getCameraPosition().zoom > TINY_ZOOM_LEVEL){
+			marker.remove();
+        	station.setMarker(addMarker(station, MarkerSize.MID));
+		}else if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
+			marker.remove();
+        	station.setMarker(addMarker(station, MarkerSize.TINY));
+		}
+	}
+	
+	private void unhighlightMarker(Station station){	
+		resetToNormalMarker(station);
+		
 		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
 		    visibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
 		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)

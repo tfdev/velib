@@ -1,7 +1,6 @@
 package trouve.mon.velib.station;
 
 import java.sql.Date;
-import java.util.Locale;
 
 import android.util.Log;
 
@@ -18,23 +17,7 @@ public class Station {
 	
 	
 	//----------------- Class methods -----------------
-	
-	//TODO find something i18n compliant
-	static String capitalizeString(String string) {
-		char[] chars = string.toLowerCase(Locale.getDefault()).toCharArray();
-		boolean found = false;
-		for (int i = 0; i < chars.length; i++) {
-			if (!found && Character.isLetter(chars[i])) {
-				chars[i] = Character.toUpperCase(chars[i]);
-				found = true;
-			} else if (Character.isWhitespace(chars[i]) || chars[i]=='-' || chars[i]=='\'' ) {
-				found = false;
-			}
-		}
-		return String.valueOf(chars);
-	}
-	
-	
+		
 	//----------------- Instance Fields ------------------
 	
 	private boolean favorite;
