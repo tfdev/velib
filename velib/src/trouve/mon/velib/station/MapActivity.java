@@ -140,7 +140,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
-        hideDetails();
+        if(markerManager != null){
+        	hideDetails();
+        }
     }
 	
 	@Override
