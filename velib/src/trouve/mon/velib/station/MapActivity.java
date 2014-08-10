@@ -287,7 +287,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		
 		displayDistanceDetail(station);
 		
-		stationTextView.setText(String.valueOf(station.getFormattedName()));
+		stationTextView.setText(station.toString());
 	}
 	
 	public void slideToTop(View view) {

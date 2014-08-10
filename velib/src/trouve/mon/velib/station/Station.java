@@ -2,6 +2,7 @@ package trouve.mon.velib.station;
 
 import java.sql.Date;
 
+import trouve.mon.velib.util.Formatter;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -115,12 +116,9 @@ public class Station {
 		this.lastUpDate = lastUpDate;
 	}
 	
-	public String getFormattedName() {
-		String formattedName = "";
-		if(name != null){
-			formattedName = name.substring(name.indexOf('-')+2);
-		}
-		return formattedName;
+	@Override
+	public String toString(){
+		return Formatter.formatName(name);
 	}
 	
 	public boolean isDifferent(MarkerWrapper markerWrapper){
