@@ -472,8 +472,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	public SharedPreferences getFavoriteSharedPreferences(){
 		// TODO favorite needs to contract specific
 		// key needs to include the contract
-		
-	    return getSharedPreferences(Station.KEY_FAVORITE, MODE_PRIVATE);
+		String contract = getPreferredContract();
+	    return getSharedPreferences(Station.KEY_FAVORITE + contract, MODE_PRIVATE);
 	}
 	
 	
@@ -495,6 +495,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP){
 			if(resultCode == RESULT_OK){
+				loadFavorites();
 				StationManager.INSTANCE.getStationMap().clear();
 				markerManager.resetAllMarkers();
 				markerManager.actionIfNoStation = true;
