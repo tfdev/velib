@@ -265,6 +265,7 @@ public class ResourceFactory {
 
 		Canvas canvas = new Canvas(bitmap);
 		Paint textPaint = new Paint();
+		textPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(getTextSize());
 		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -336,6 +337,7 @@ public class ResourceFactory {
 
 		Canvas canvas = new Canvas(bitmap);
 		Paint textPaint = new Paint();
+		textPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 		textPaint.setTextAlign(Paint.Align.CENTER);
 		textPaint.setTextSize(getBigTextSize());
 		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
