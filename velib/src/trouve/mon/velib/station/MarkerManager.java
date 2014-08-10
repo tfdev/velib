@@ -232,13 +232,13 @@ public class MarkerManager {
 		MarkerSize size = null;
 		SparseArray<MarkerWrapper> current = null;
 		if (map.getCameraPosition().zoom > MID_ZOOM_LEVEL) {
-			size = MarkerSize.NORMAL;
+			size = detailing ? MarkerSize.BIG : MarkerSize.NORMAL;
 			current = normalMarkers;
 		} else if (map.getCameraPosition().zoom > TINY_ZOOM_LEVEL) {
-			size = MarkerSize.MID;
+			size = detailing ? MarkerSize.NORMAL :MarkerSize.MID;
 			current = midMarkers;
 		} else if (map.getCameraPosition().zoom > MAX_ZOOM_LEVEL) {
-			size = MarkerSize.TINY;
+			size = detailing ? MarkerSize.NORMAL :MarkerSize.TINY;
 			current = tinyMarkers;
 		}
 

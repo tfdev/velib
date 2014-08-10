@@ -28,6 +28,7 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -104,7 +105,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private TextView stationTextView;
 	private ImageView bikeImageView;
 	private ImageView standImageView;
-	private ImageView favImageView;
+	private ImageButton favImageView;
 	
 	private MarkerManager markerManager;
 	
@@ -219,7 +220,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		stationTextView = (TextView) findViewById(R.id.station_info);
 		bikeImageView = (ImageView) findViewById(R.id.bike);
 		standImageView = (ImageView) findViewById(R.id.parking);
-		favImageView = (ImageView) findViewById(R.id.favorite);
+		favImageView = (ImageButton) findViewById(R.id.favorite);
 		favImageView.setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
