@@ -19,7 +19,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,12 +47,9 @@ import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MapActivity extends Activity implements 	ConnectionCallbacks,
@@ -65,25 +61,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 														OnMapClickListener, 
 														OnMapLongClickListener{
 	
-	enum MarkerSize{
-		TINY,
-		MID,
-		BIG
-	}
+
 	
 	//----------------- Static Fields ------------------
 	
 	private static final String TAG = MapActivity.class.getName();
 	
-	private static final float HIGHLIGHT_ALPHA = 0.4f;
-	private static final float NORMAL_ALPHA = 1.0f;
-	
-	private static final float CENTER_ZOOM_LEVEL = 15.5f;
-	private static final float MID_ZOOM_LEVEL = 14.8f;
-	private static final float TINY_ZOOM_LEVEL = 13.8f;
-	private static final float MAX_ZOOM_LEVEL = 13.0f;
+
 	private static final long REFRESH_PERIOD = 60; //SECONDS
-	
+	private static final float CENTER_ZOOM_LEVEL = 15.5f;
     private static final LocationRequest REQUEST = LocationRequest.create()
     															  .setInterval(5000)
             													  .setFastestInterval(16)
@@ -98,17 +84,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private Menu menu;
 	private Animation refreshButtonAnimation;
 	
-	private SparseArray<Station> visibleMarkers = new SparseArray<Station>(20);
-	private SparseArray<Station> midVisibleMarkers = new SparseArray<Station>(150);
-	private SparseArray<Station> tinyVisibleMarkers = new SparseArray<Station>(600);
-	
 	private boolean refreshing = false;
-	private boolean detailing = false;
-	private boolean centering = false;
+
+	private boolean centering = false;	
 	private boolean onCreate = true;
-	private boolean actionIfNoStation = false;
-	
-	private int detailedStationNumber;
+
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	@SuppressWarnings("rawtypes")
@@ -126,6 +106,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	private ImageView standImageView;
 	private ImageView favImageView;
 	
+	private MarkerManager markerManager;
 	
 	//-----------------  Activity Lifecycle ------------------
 	
@@ -133,7 +114,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		loadFavorites();
-		retrieveExtraInfo();
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
@@ -177,7 +157,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle presses on the action bar items
+
 	    switch (item.getItemId()) {
 	        case R.id.action_refresh:
 	            startRefresh();
@@ -199,12 +179,17 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	//-----------------  Instance Methods ------------------
 	
 	//TODO fixme
+	/*
 	private void retrieveExtraInfo(){
 		Bundle bundle = getIntent().getExtras();
 		if( bundle != null && 
 			bundle.getInt(ContractListActivity.EXTRA_CODE) == ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY){
 			actionIfNoStation = true;
 		}
+	}*/
+	
+	public MarkerManager getMarkerManager(){
+		return markerManager;
 	}
 	
     private void setUpResourceDelegate(){
@@ -238,7 +223,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		favImageView.setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
-				Station station = StationManager.INSTANCE.get(detailedStationNumber);
+				Station station = StationManager.INSTANCE.get(markerManager.detailedStationNumber);
 				setFavorite(station, !station.isFavorite());
 				setFavImageOnDetailView(station);
 			}
@@ -251,15 +236,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		standImageView.setColorFilter(color);
 	}
 	
-	private void hideDetails() {
-		if(detailing){
-			detailing = false;
-			setDetailViewVisible(false);
-			Station station = StationManager.INSTANCE.get(detailedStationNumber);
-			unhighlightMarker(station);
-		}
-	}
-	
 	private void setFavImageOnDetailView(Station station){
 		if(station.isFavorite())
 			favImageView.setImageResource(R.drawable.ic_fav);
@@ -268,25 +244,26 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void showDetails(Marker marker){	
-		if(detailing){
-			Station oldStation = StationManager.INSTANCE.get(detailedStationNumber);
-			resetToNormalMarker(oldStation);
-		}
-		detailing = true;
 		int stationNumber = Integer.parseInt(marker.getTitle());
-		detailedStationNumber = stationNumber;
-		
 		Station station = StationManager.INSTANCE.get(stationNumber);
 		setFavImageOnDetailView(station);
 		centerMap(station);
 		updateDetailInfo(station);
 		setDetailViewVisible(true);
-		highlightMarker(station);
+		
+		markerManager.highlightMarker(stationNumber);
+	}
+	
+	private void hideDetails() {
+		if(markerManager.detailing){
+			setDetailViewVisible(false);
+			markerManager.unhighlightMarker();
+		}
 	}
 	
 	public void refreshDetails(){
-		if(detailing){
-			updateDetailInfo(StationManager.INSTANCE.get(detailedStationNumber));
+		if(markerManager.detailing){
+			updateDetailInfo(StationManager.INSTANCE.get(markerManager.detailedStationNumber));
 		}
 	}
 	
@@ -370,6 +347,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         if (map == null) {
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             if (map != null) {
+            	markerManager = new MarkerManager(map, delegate);
                 map.setMyLocationEnabled(true);
                 map.setOnMyLocationButtonClickListener(this);
                 map.getUiSettings().setZoomControlsEnabled(false);
@@ -379,112 +357,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
                 map.setOnMapLongClickListener(this);
             }
         }
-    }
-    
-    
-    //TODO should check for GC and leak
-	@SuppressWarnings("unchecked")
-	public void refreshMarkers(boolean forceRefresh) {
-		if(this.map != null){	
-			SparseArray<Station> stationsOnMap;
-			MarkerSize size;
-	
-			if(map.getCameraPosition().zoom > MID_ZOOM_LEVEL){ 
-				resetMarkers(tinyVisibleMarkers, midVisibleMarkers);
-				stationsOnMap = visibleMarkers;
-				size = MarkerSize.BIG;
-			}else if(map.getCameraPosition().zoom > TINY_ZOOM_LEVEL){
-				resetMarkers(visibleMarkers, tinyVisibleMarkers);
-				stationsOnMap = midVisibleMarkers;	
-				size = MarkerSize.MID;
-			}else if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
-				resetMarkers(visibleMarkers, midVisibleMarkers);
-				stationsOnMap = tinyVisibleMarkers;
-				size = MarkerSize.TINY;
-			}else{
-				resetMarkers(visibleMarkers, midVisibleMarkers, tinyVisibleMarkers);
-				return;
-			}
-			
-	        LatLngBounds bounds = this.map.getProjection().getVisibleRegion().latLngBounds;
-	    	SparseArray<Station> stations = StationManager.INSTANCE.getStationMap();
-			for(int i = 0, nsize = stations.size(); i < nsize; i++) {
-			    Station station = stations.valueAt(i);
-			    Station stationOnMap = stationsOnMap.get(station.getNumber());
-			    // if station is visible
-	            if(bounds.contains(station.getPosition())){
-	            	actionIfNoStation = false;
-	                if(stationOnMap == null){ //if there is no marker yet 
-	                	station.setMarker(addMarker(station, size));
-	                	stationsOnMap.put(station.getNumber(), station);             		
-	                }else if(forceRefresh){ //else if data have just been updated
-	                	if(stationOnMap.isDifferent(station)){
-		                	stationOnMap.getMarker().remove();
-		                	if(detailing && station.getNumber() == detailedStationNumber){
-		                		station.setMarker(addMarker(station, MarkerSize.BIG));
-		                	}else{
-		                		station.setMarker(addMarker(station, size));	
-		                	}
-		                	stationsOnMap.put(station.getNumber(), station); 
-	                	}else{
-	                		station.setMarker(stationOnMap.getMarker());
-	                		stationsOnMap.put(station.getNumber(), station); 
-	                	}
-	                }
-	            }
-	            else{ // station is not visible
-	            	// if there is a marker and just updated
-	            	if(stationOnMap != null && forceRefresh){
-	            		if(stationOnMap.isDifferent(station)){
-	            			stationOnMap.getMarker().remove();
-		            		stationsOnMap.remove(station.getNumber());
-	            		}
-	                }
-	            }
-	        }
-			
-			goAwayIfNoStation();	
-	    }
-	}	
-	
-	private void goAwayIfNoStation(){
-		if(actionIfNoStation){
-			actionIfNoStation = false;
-			centerMapFarAway();
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void resetAllMarkers(){
-		resetMarkers(tinyVisibleMarkers, midVisibleMarkers, visibleMarkers);
-	}
-	
-    @SuppressWarnings("unchecked")
-	private void resetMarkers(SparseArray<Station>... arguments) {
-    	for(SparseArray<Station> stations : arguments){
-    		for(int i = 0, nsize = stations.size(); i < nsize; i++) {
-    			stations.valueAt(i).getMarker().remove();
-    		}
-    		stations.clear();
-    	}
-	}
-    
-    private Marker addMarker(Station station, MarkerSize markerSize){
-    	MarkerOptions markerOptions = new MarkerOptions().position(station.getPosition())
-				.title(String.valueOf(station.getNumber()));	
-    	
-    	BitmapDescriptor descriptor = null;
-    	switch(markerSize){
-    		case TINY: descriptor = delegate.getTinyMarkerBitmapDescriptor(station); break;
-    		case MID: descriptor = delegate.getMidMarkerBitmapDescriptor(station); break;
-    		case BIG: descriptor = delegate.getBigMarkerBitmapDescriptor(station); break;
-    	}
-    	markerOptions.icon(descriptor);
-    	if(detailing && detailedStationNumber != station.getNumber()){
-    		markerOptions.alpha(HIGHLIGHT_ALPHA);
-    	}
-    	
-		return map.addMarker(markerOptions);
     }
     
     private void setUpAndConnectLocationClient() {
@@ -498,15 +370,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     private boolean isGpsEnabled(){
     	 final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     	 return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-    
-    
-    private void centerMapFarAway(){
-    	SparseArray<Station> stations = StationManager.INSTANCE.getStationMap();
-    	if(stations.size() != 0){
-    		Station station = stations.valueAt(0);
-    		map.animateCamera(CameraUpdateFactory.newLatLngZoom(station.getPosition(), TINY_ZOOM_LEVEL));
-    	}
     }
     
 	private int distanceFromLastLocation(Station station){
@@ -547,46 +410,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
 	
-	private void highlightMarker(Station station){	
-		Marker marker = station.getMarker();
-		if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
-			marker.remove();
-        	station.setMarker(addMarker(station, MarkerSize.BIG));
-		}
-		
-		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
-		    visibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
-		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
-			midVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
-		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
-			tinyVisibleMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
-		station.getMarker().setAlpha(NORMAL_ALPHA);
-	}
-	
-	private void resetToNormalMarker(Station station){
-		Marker marker = station.getMarker();
-		if(map.getCameraPosition().zoom > MID_ZOOM_LEVEL){
-			marker.remove();
-        	station.setMarker(addMarker(station, MarkerSize.BIG));
-		}else if(map.getCameraPosition().zoom > TINY_ZOOM_LEVEL){
-			marker.remove();
-        	station.setMarker(addMarker(station, MarkerSize.MID));
-		}else if(map.getCameraPosition().zoom > MAX_ZOOM_LEVEL){
-			marker.remove();
-        	station.setMarker(addMarker(station, MarkerSize.TINY));
-		}
-	}
-	
-	private void unhighlightMarker(Station station){	
-		resetToNormalMarker(station);
-		
-		for(int i = 0, nsize = visibleMarkers.size(); i < nsize; i++)
-		    visibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
-		for(int i = 0, nsize = midVisibleMarkers.size(); i < nsize; i++)
-			midVisibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
-		for(int i = 0, nsize = tinyVisibleMarkers.size(); i < nsize; i++)
-			tinyVisibleMarkers.valueAt(i).getMarker().setAlpha(NORMAL_ALPHA);
-	}
 	
     public void showRefreshing(){
     	refreshing = true;
@@ -626,7 +449,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	public void setFavorite(Station station, boolean isFavorite){
 		station.setFavorite(isFavorite);
-		updateMarker(station);
+		markerManager.updateMarker(station);
 		SharedPreferences.Editor editor = getFavoriteSharedPreferences().edit();
 		if(isFavorite){
 			editor.putBoolean(String.valueOf(station.getNumber()), true);
@@ -636,21 +459,6 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		editor.apply();
 	}
 	
-	private void updateMarker(Station station){
-		MarkerSize size = null;
-		if (map.getCameraPosition().zoom > MID_ZOOM_LEVEL) {
-			size = MarkerSize.BIG;
-		} else if (map.getCameraPosition().zoom > TINY_ZOOM_LEVEL) {
-			size = MarkerSize.MID;
-		} else if (map.getCameraPosition().zoom > MAX_ZOOM_LEVEL) {
-			size = MarkerSize.TINY;
-		}
-
-		if (size != null) {
-			station.getMarker().remove();
-			station.setMarker(addMarker(station, size));
-		}
-	}
 	
 	// Needs to be called from onCreate()
 	// before any station has been loaded
@@ -685,8 +493,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 		if(requestCode == ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP){
 			if(resultCode == RESULT_OK){
 				StationManager.INSTANCE.getStationMap().clear();
-				resetAllMarkers();
-				actionIfNoStation = true;
+				markerManager.resetAllMarkers();
+				markerManager.actionIfNoStation = true;
 			}
 		}
 	}
@@ -698,7 +506,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	@Override
 	public void onCameraChange(CameraPosition position) {
-		refreshMarkers(false);
+		markerManager.refreshMarkers(false);
 		if(!centering){
 			hideDetails();
 		}

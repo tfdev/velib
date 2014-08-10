@@ -5,7 +5,6 @@ import java.sql.Date;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
 public class Station {
 	
@@ -33,8 +32,7 @@ public class Station {
 	private int availableBikeStands;
 	private int availableBikes;
 	private Date lastUpDate;
-	
-	private Marker marker;
+
 	
 	//----------------- Instance Methods ------------------
 	
@@ -124,19 +122,12 @@ public class Station {
 		}
 		return formattedName;
 	}
-
-	public Marker getMarker() {
-		return marker;
-	}
-
-	public void setMarker(Marker marker) {
-		this.marker = marker;
-	}
 	
-	public boolean isDifferent(Station station){
-		return (station == null) || (station.getNumber() != number)
-								 || (station.getAvailableBikes() != availableBikes)
-								 || (station.getAvailableBikeStands() != availableBikeStands);
+	public boolean isDifferent(MarkerWrapper markerWrapper){
+		return (markerWrapper == null) || (markerWrapper.getNumber() != number)
+								 	   || (markerWrapper.getBikes() != availableBikes)
+								 	   || (markerWrapper.getStands() != availableBikeStands)
+								 	   || (markerWrapper.getStatus() != status);
 	}
 	
 	public boolean isFavorite() {

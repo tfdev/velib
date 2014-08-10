@@ -42,6 +42,10 @@ public class ResourceDelegate {
 	private BitmapDescriptor markerOrangeTiny;
 	private BitmapDescriptor markerRedTiny;
 	
+	private Bitmap markerGreenBig;
+	private Bitmap markerOrangeBig;
+	private Bitmap markerRedBig;
+	
 	private BitmapDescriptor fav;
 	
 	//-----------------  Instance Methods ------------------
@@ -116,6 +120,24 @@ public class ResourceDelegate {
 		}
 		return markerOrange;
 	}
+	public Bitmap getMarkerGreenBig() {
+		if(markerGreenBig == null){
+			markerGreenBig = BitmapFactory.decodeResource(getResources(), R.drawable.big_marker_green, null);
+		}
+		return markerGreenBig;
+	}
+	public Bitmap getMarkerOrangeBig() {
+		if(markerOrangeBig == null){
+			markerOrangeBig = BitmapFactory.decodeResource(getResources(), R.drawable.big_marker_orange, null);
+		}
+		return markerOrangeBig;
+	}
+	public Bitmap getMarkerRedBig() {
+		if(markerRedBig == null){
+			markerRedBig = BitmapFactory.decodeResource(getResources(), R.drawable.big_marker_red, null);
+		}
+		return markerRedBig;
+	}
 	public BitmapDescriptor getMarkerRedBitmapDescriptor() {
 		if(markerRed == null){
 			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_red, null)
@@ -184,7 +206,16 @@ public class ResourceDelegate {
 	private int getCenterBike(){
 		return getResources().getDimensionPixelSize(R.dimen.center_bike);
 	}
-	public BitmapDescriptor getOpenMarkerBitmapDescriptor(Station station) {
+	private int getCenterBigStand(){
+		return getResources().getDimensionPixelSize(R.dimen.center_big_stand);
+	}
+	private int getCenterBigBike(){
+		return getResources().getDimensionPixelSize(R.dimen.center_big_bike);
+	}
+	private int getCenterBigX(){
+		return getResources().getDimensionPixelSize(R.dimen.center_big_x);
+	}
+	public BitmapDescriptor getOpenNormalMarkerBitmapDescriptor(Station station) {
 		int color,
 			bikes = station.getAvailableBikes(),
 			stands = station.getAvailableBikeStands();
@@ -242,15 +273,59 @@ public class ResourceDelegate {
 			return getMarkerGreenMid();
 		}
 	}
-	public BitmapDescriptor getBigMarkerBitmapDescriptor(Station station) {								            
+	public BitmapDescriptor getNormalMarkerBitmapDescriptor(Station station) {								            
     	if(station.getStatus() == Status.OPEN){
-    		return getOpenMarkerBitmapDescriptor(station);
+    		return getOpenNormalMarkerBitmapDescriptor(station);
     	}else if(station.isFavorite()){
     			return getMarkerRedFavBitmapDescriptor();
     	}else{
     			return getMarkerRedBitmapDescriptor();
     	}
 	}
-    
+	public BitmapDescriptor getBigMarkerBitmapDescriptor(Station station) {								            
+		int color, bikes = station.getAvailableBikes(), stands = station
+				.getAvailableBikeStands();
+		Bitmap bitmap = null;
+		if(bikes == 0 && stands == 0){
+			/*if (station.isFavorite())
+			bitmap = getMarkerOrangeFav().copy(Bitmap.Config.ARGB_8888,
+					true);
+			else*/
+				bitmap = getMarkerRedBig().copy(Bitmap.Config.ARGB_8888, true);
+			color = RED;
+		}
+		else if (bikes <= 3 || stands <= 3) {
+			/*if (station.isFavorite())
+				bitmap = getMarkerOrangeFav().copy(Bitmap.Config.ARGB_8888,
+						true);
+			else*/
+				bitmap = getMarkerOrangeBig().copy(Bitmap.Config.ARGB_8888, true);
+			color = ORANGE;
+		} else {
+			/*if (station.isFavorite())
+				bitmap = getMarkerGreenFav()
+						.copy(Bitmap.Config.ARGB_8888, true);
+			else*/
+				bitmap = getMarkerGreenBig().copy(Bitmap.Config.ARGB_8888, true);
+			color = GREEN;
+		}
+
+		Canvas canvas = new Canvas(bitmap);
+		Paint textPaint = new Paint();
+		textPaint.setTextAlign(Paint.Align.CENTER);
+		textPaint.setTextSize(getBigTextSize());
+		textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		textPaint.setColor(color);
+		canvas.drawText(String.valueOf(bikes), 
+						bitmap.getWidth() / 2 - getCenterBigX(),
+						bitmap.getHeight() / 2 - getCenterBigBike(), 
+						textPaint);
+		canvas.drawText(String.valueOf(stands), 
+						bitmap.getWidth() / 2 - getCenterBigX(),
+						bitmap.getHeight() / 2 + getCenterBigStand(), 
+						textPaint);
+
+		return BitmapDescriptorFactory.fromBitmap(bitmap);
+	}
 	
 }

@@ -47,7 +47,7 @@ public class StationUpdater implements Runnable{
 	        	StationParser.parse(connection.getInputStream());
 	        	mapActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						mapActivity.refreshMarkers(true);
+						mapActivity.getMarkerManager().refreshMarkers(true);
 						mapActivity.refreshDetails();
 					}
 				});

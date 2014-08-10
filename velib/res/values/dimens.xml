@@ -9,6 +9,10 @@
     <dimen name="center_closed">3dip</dimen>
 	<dimen name="center_stand">1dip</dimen>
 	
+	<dimen name="center_big_bike">21dip</dimen>
+	<dimen name="center_big_stand">0dip</dimen>
+	<dimen name="center_big_x">10dip</dimen>
+	
 	<!-- detail bar -->
     <dimen name="text_size">13sp</dimen>
     <dimen name="big_text_size">18sp</dimen>
