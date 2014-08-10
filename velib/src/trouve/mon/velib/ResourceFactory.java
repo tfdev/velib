@@ -13,7 +13,7 @@ import android.graphics.Typeface;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-public class ResourceDelegate {
+public class ResourceFactory {
 
 	// ----------------- Class Fields ------------------
 
@@ -53,7 +53,7 @@ public class ResourceDelegate {
 
 	// ----------------- Instance Methods ------------------
 
-	public ResourceDelegate(Resources resources) {
+	public ResourceFactory(Resources resources) {
 		this.resources = resources;
 	}
 

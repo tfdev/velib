@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import trouve.mon.velib.R;
-import trouve.mon.velib.ResourceDelegate;
+import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.contract.Contract;
 import trouve.mon.velib.contract.ContractListActivity;
 import trouve.mon.velib.util.Formatter;
@@ -78,7 +78,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     
     //-----------------  Instance Fields ------------------
     
-    private ResourceDelegate delegate;
+    private ResourceFactory resourceFactory;
     private GoogleMap map;
     private LocationClient locationClient;	
     
@@ -194,8 +194,8 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
     private void setUpResourceDelegate(){
-    	if(delegate == null){
-    		delegate = new ResourceDelegate(getResources());
+    	if(resourceFactory == null){
+    		resourceFactory = new ResourceFactory(getResources());
     	}
     }
     
@@ -348,7 +348,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         if (map == null) {
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             if (map != null) {
-            	markerManager = new MarkerManager(map, delegate);
+            	markerManager = new MarkerManager(map, resourceFactory);
                 map.setMyLocationEnabled(true);
                 map.setOnMyLocationButtonClickListener(this);
                 map.getUiSettings().setZoomControlsEnabled(false);

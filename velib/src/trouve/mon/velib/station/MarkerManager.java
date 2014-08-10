@@ -1,6 +1,6 @@
 package trouve.mon.velib.station;
 
-import trouve.mon.velib.ResourceDelegate;
+import trouve.mon.velib.ResourceFactory;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,7 +33,7 @@ public class MarkerManager {
 	private SparseArray<MarkerWrapper> tinyMarkers = new SparseArray<MarkerWrapper>(600);
 
 	private final GoogleMap map;
-	private ResourceDelegate delegate;
+	private ResourceFactory resourceFactory;
 
 	public boolean detailing = false;
 	public int detailedStationNumber;
@@ -41,9 +41,9 @@ public class MarkerManager {
 
 	// ----------------- Constructor ------------------
 
-	public MarkerManager(GoogleMap map, ResourceDelegate delegate) {
+	public MarkerManager(GoogleMap map, ResourceFactory delegate) {
 		this.map = map;
-		this.delegate = delegate;
+		this.resourceFactory = delegate;
 	}
 
 	// ----------------- Instance Methods ------------------
@@ -134,16 +134,16 @@ public class MarkerManager {
 		BitmapDescriptor descriptor = null;
 		switch (markerSize) {
 		case TINY:
-			descriptor = delegate.getTinyMarkerBitmapDescriptor(station);
+			descriptor = resourceFactory.getTinyMarkerBitmapDescriptor(station);
 			break;
 		case MID:
-			descriptor = delegate.getMidMarkerBitmapDescriptor(station);
+			descriptor = resourceFactory.getMidMarkerBitmapDescriptor(station);
 			break;
 		case NORMAL:
-			descriptor = delegate.getNormalMarkerBitmapDescriptor(station);
+			descriptor = resourceFactory.getNormalMarkerBitmapDescriptor(station);
 			break;
 		case BIG:
-			descriptor = delegate.getBigMarkerBitmapDescriptor(station);
+			descriptor = resourceFactory.getBigMarkerBitmapDescriptor(station);
 			break;
 		}
 		markerOptions.icon(descriptor);
