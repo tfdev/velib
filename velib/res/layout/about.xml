@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/logo_blue_light" >
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/about_logo" />
+    
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" >
+        
+        <Button
+            android:id="@+id/rate"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:text="Noter l'application"
+            android:textColor="@color/logo_blue"
+            android:textStyle="bold"
+            android:background="@android:color/white" 
+            android:paddingLeft="10dp"
+            android:drawableLeft="@drawable/ic_action_good" />
+        
+    </LinearLayout>
+    
+    <LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/mail"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:text="M'écrire"
+            android:textColor="@color/logo_blue"
+            android:textStyle="bold"
+            android:background="@android:color/white"
+            android:paddingLeft="10dp"
+            android:drawableLeft="@drawable/ic_action_email" />
+
+    </LinearLayout>
+   	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" >
+        
+        <Button
+            android:id="@+id/share"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:text="Partager"
+            android:textColor="@color/logo_blue"
+            android:textStyle="bold"
+            android:background="@android:color/white"
+            android:paddingLeft="10dp"
+            android:drawableLeft="@drawable/ic_action_share" />
+
+    </LinearLayout>
+
+</LinearLayout>
