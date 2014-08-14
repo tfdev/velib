@@ -2,32 +2,35 @@
 <resources>
 
     <string name="app_name">monVélo</string>
-    
     <string name="ok">Enregistrer</string>
-    
     <string name="meter">m</string>
     <string name="kilometer">km</string>
-    
+
     <!-- Message -->
+
+    <string name="msg_no_gps">Connexion GPS impossible</string>
+    <string name="msg_go_gps">Activez le GPS</string>
+    <string name="msg_check_internet">Vérifiez votre connexion internet</string>
+    <string name="msg_no_data">Service indisponible</string>
+    <string name="msg_no_station">Pas de station</string>
+    <string name="msg_here">à cet endroit</string>
+    <string name="msg_waiting_gps">En attente d\'informations de localisation&#8230;</string>
+
+    <!-- Other -->
+
+    <string name="select_city">Sélectionnez votre ville</string>
+
+    <!-- Actions -->
+
+    <string name="action_settings">Préférences</string>
+    <string name="action_refresh">Rafraîchir</string>
+    <string name="action_favorite">Favoris</string>
+    <string name="title_activity_about">A propos</string>
+
+    <!-- About -->
     
-	<string name="msg_no_gps">Connexion GPS impossible</string>
-	<string name="msg_go_gps">Activez le GPS</string>
-	
-	<string name="msg_check_internet">Vérifiez votre connexion internet</string>
-	<string name="msg_no_data">Service indisponible</string>
-	<string name="msg_no_station">Pas de station</string>
-	<string name="msg_here">à cet endroit</string>
-	
-	<string name="msg_waiting_gps">En attente d\'informations de localisation&#8230;</string>
-	
-	<!-- Other -->
+    <string name="rate_app">Noter l\'application</string>
+    <string name="mail_me">M\'écrire vos suggestions</string>
+    <string name="share_it">Partager avec vos amis</string>
     
-	<string name="select_city">Sélectionnez votre ville</string>
-	
-	<!-- Actions -->
-	
-	<string name="action_settings">Préférences</string>
-	<string name="action_refresh">Rafraîchir</string>
-	<string name="action_favorite">Favoris</string>
-	
 </resources>
