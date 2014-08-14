@@ -117,7 +117,6 @@ public class MarkerManager {
 		resetMarkers(tinyMarkers, midMarkers, normalMarkers);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void resetMarkers(SparseArray<MarkerWrapper>... arguments) {
 		for (SparseArray<MarkerWrapper> markerWrappers : arguments) {
 			for (int i = 0, nsize = markerWrappers.size(); i < nsize; i++) {

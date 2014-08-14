@@ -423,14 +423,14 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
         		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
         		refreshButtonAnimation.setRepeatCount(Animation.INFINITE);
         	}
-        	item.getActionView().startAnimation(refreshButtonAnimation);
+        	item.getActionView().findViewById(R.id.btn_refresh).startAnimation(refreshButtonAnimation);
     	}
     }
     public void stopRefreshing(){
     	refreshing = false;
         MenuItem item = menu.findItem(R.id.action_refresh);
         if(item.getActionView() != null){
-        	item.getActionView().clearAnimation();
+        	item.getActionView().findViewById(R.id.btn_refresh).clearAnimation();
         }    
     }
     

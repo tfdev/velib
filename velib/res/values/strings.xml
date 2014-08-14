@@ -22,15 +22,15 @@
 
     <!-- Actions -->
 
-    <string name="action_settings">Préférences</string>
+    <string name="action_settings">Changer de ville</string>
     <string name="action_refresh">Rafraîchir</string>
     <string name="action_favorite">Favoris</string>
-    <string name="title_activity_about">A propos</string>
+    <string name="action_about">A propos</string>
 
     <!-- About -->
     
     <string name="rate_app">Noter l\'application</string>
-    <string name="mail_me">M\'écrire vos suggestions</string>
+    <string name="mail_me">M\'écrire un petit mot</string>
     <string name="share_it">Partager avec vos amis</string>
     
 </resources>

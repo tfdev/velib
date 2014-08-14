@@ -51,7 +51,7 @@
         </activity>
         <activity
             android:name="trouve.mon.velib.AboutActivity"
-            android:label="@string/title_activity_about" >
+            android:label="@string/action_about" >
         </activity>
     </application>
 
