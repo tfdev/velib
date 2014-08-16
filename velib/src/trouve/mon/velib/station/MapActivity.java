@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import trouve.mon.velib.AboutActivity;
 import trouve.mon.velib.R;
 import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.contract.Contract;
@@ -167,6 +168,9 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	            return true;
 	        case R.id.action_settings:
 	        	startConfigActivity(true);
+	            return true;
+	        case R.id.action_about:
+	        	startAboutActivity();
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
@@ -486,6 +490,11 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 			startActivity(intent);
 			finish();
 		}
+	}
+	
+	private void startAboutActivity() {
+		Intent intent = new Intent(this, AboutActivity.class);
+		startActivity(intent);
 	}
 	
 	

@@ -3,7 +3,7 @@ package trouve.mon.velib.station;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Date;
+//import java.sql.Date;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -99,9 +99,9 @@ public abstract class StationParser {
 			else if(ATTRIBUTE_BONUS.equals(attribute)){
 				station.setBonus(reader.nextBoolean()); 
 			}
-			else if(ATTRIBUTE_LAST_UPDATE.equals(attribute)){
-				station.setLastUpDate(new Date(reader.nextLong()));
-			}
+			//else if(ATTRIBUTE_LAST_UPDATE.equals(attribute)){
+			//	station.setLastUpDate(new Date(reader.nextLong()));
+			//}
 			else if(ATTRIBUTE_NAME.equals(attribute)){
 				station.setName(reader.nextString());
 			}
