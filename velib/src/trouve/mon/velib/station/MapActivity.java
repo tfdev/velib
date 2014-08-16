@@ -11,7 +11,7 @@ import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.contract.Contract;
 import trouve.mon.velib.contract.ContractListActivity;
 import trouve.mon.velib.util.Formatter;
-import trouve.mon.velib.util.Helper;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -114,7 +114,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Helper.setUpActionBarCustomTheme(this);
+		setActionBarTitle();
 		loadFavorites();
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
@@ -213,7 +213,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	}
 	
 	private void setUpStationDetailView(){
-		getLayoutInflater().inflate(R.layout.detail_bar_new_design, (ViewGroup) findViewById(R.id.map));
+		getLayoutInflater().inflate(R.layout.station_row, (ViewGroup) findViewById(R.id.map));
 		detailContainerView = findViewById(R.id.detail_layout);
 		detailContainerView.setVisibility(View.INVISIBLE);
 		detailContainerView.setOnClickListener(new View.OnClickListener() {
@@ -454,6 +454,25 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	    return preferredContract;
 	}
 	
+	private void setActionBarTitle(){
+		setTheme(R.style.CustomActionBarTheme);
+		ActionBar actionBar = getActionBar();
+		actionBar.setTitle(getPreferredContract());
+		actionBar.setSubtitle(getPreferredService());
+	    actionBar.setDisplayShowTitleEnabled(true);
+	    actionBar.setDisplayShowHomeEnabled(true);
+	    actionBar.setDisplayUseLogoEnabled(false);
+	}
+	
+	private String getPreferredService(){
+		SharedPreferences settings = getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, MODE_PRIVATE);
+	    String service = settings.getString(Contract.SERVICE_PREFERENCE_KEY, null);
+	    if(service == null){
+	    	startConfigActivity(false);
+	    }
+	    return service;
+	}
+	
 	public void setFavorite(Station station, boolean isFavorite){
 		station.setFavorite(isFavorite);
 		markerManager.updateMarker(station);
@@ -504,6 +523,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == ContractListActivity.REQUEST_CODE_USE_EXISTING_MAP){
 			if(resultCode == RESULT_OK){
+				setActionBarTitle();
 				loadFavorites();
 				StationManager.INSTANCE.getStationMap().clear();
 				markerManager.resetAllMarkers();
