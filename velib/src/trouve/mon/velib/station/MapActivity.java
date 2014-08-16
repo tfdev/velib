@@ -10,6 +10,7 @@ import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.contract.Contract;
 import trouve.mon.velib.contract.ContractListActivity;
 import trouve.mon.velib.util.Formatter;
+import trouve.mon.velib.util.Helper;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -87,9 +88,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	
 	private boolean refreshing = false;
 
-	private boolean centering = false;	
-	private boolean onCreate = true;
-
+	private boolean centering = false;
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	@SuppressWarnings("rawtypes")
@@ -114,14 +113,15 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helper.setUpActionBarCustomTheme(this);
 		loadFavorites();
 		setUpResourceDelegate();
 		setContentView(R.layout.map_activity);
 		horribleHackToMoveMyLocationButton();
 		setUpStationDetailView();
 	}
-	
-    @Override
+
+	@Override
     protected void onResume() {
         super.onResume();
         if(getPreferredContract() != null){
@@ -526,10 +526,7 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
-		if(onCreate){
-			centerMapOnMyLocation(false);
-			onCreate = false;
-		}
+		centerMapOnMyLocation(false);
 	}
 	@Override
 	public void onDisconnected() {

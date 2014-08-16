@@ -1,5 +1,6 @@
 package trouve.mon.velib;
 
+import trouve.mon.velib.util.Helper;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ public class AboutActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Helper.setUpActionBarCustomTheme(this);
 		setContentView(R.layout.about);
 		setUpView();
 	}
