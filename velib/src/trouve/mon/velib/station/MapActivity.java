@@ -432,10 +432,12 @@ public class MapActivity extends Activity implements 	ConnectionCallbacks,
     }
     public void stopRefreshing(){
     	refreshing = false;
-        MenuItem item = menu.findItem(R.id.action_refresh);
-        if(item.getActionView() != null){
-        	item.getActionView().findViewById(R.id.btn_refresh).clearAnimation();
-        }    
+    	if(menu != null){
+	        MenuItem item = menu.findItem(R.id.action_refresh);
+	        if(item.getActionView() != null){
+	        	item.getActionView().findViewById(R.id.btn_refresh).clearAnimation();
+	        } 
+    	}
     }
     
 	private void scheduleUpdateData(){
