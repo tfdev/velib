@@ -34,6 +34,9 @@ public class Formatter {
             else if(name.indexOf('_') != -1){
                 formattedName = name.substring(name.indexOf('_')+1);
             }
+            else{
+            	formattedName = name;
+            }
 		}
 		return formattedName;
 	}
