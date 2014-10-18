@@ -34,6 +34,7 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyD56LjxCDfTyZwqjhw7Chgo8Eo-kqFRHXQ" />
+        <!-- AIzaSyDDiPfPD1G3T-YPHBE57ARmm1CpstwYYv0 -->
 
         <activity
             android:name="trouve.mon.velib.station.MapActivity"
