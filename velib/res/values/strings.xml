@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">monVelo</string>
-    <string name="ok">Enregistrer</string>
+    <string name="app_name">myBike</string>
+    <string name="ok">Save</string>
     <string name="meter">m</string>
     <string name="kilometer">km</string>
 
     <!-- Message -->
 
-    <string name="msg_no_gps">Connexion GPS impossible</string>
-    <string name="msg_go_gps">Activez le GPS</string>
-    <string name="msg_check_internet">Vérifiez votre connexion internet</string>
-    <string name="msg_no_data">Service indisponible</string>
-    <string name="msg_no_station">Pas de station</string>
-    <string name="msg_here">à cet endroit</string>
-    <string name="msg_waiting_gps">En attente d\'informations de localisation&#8230;</string>
+    <string name="msg_no_gps">GPS connection failed</string>
+    <string name="msg_go_gps">Please enable GPS</string>
+    <string name="msg_check_internet">Check your internet connection</string>
+    <string name="msg_no_data">Service unavailable</string>
+    <string name="msg_no_station">No station</string>
+    <string name="msg_here">at this location</string>
+    <string name="msg_waiting_gps">Waiting for your location&#8230;</string>
 
     <!-- Other -->
 
-    <string name="select_city">Sélectionnez votre ville</string>
+    <string name="select_city">Select your city</string>
 
     <!-- Actions -->
 
-    <string name="action_settings">Changer de ville</string>
-    <string name="action_refresh">Rafraîchir</string>
-    <string name="action_favorite">Favoris</string>
-    <string name="action_about">A propos</string>
+    <string name="action_settings">Change city</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_favorite">Favorites</string>
+    <string name="action_about">About</string>
 
     <!-- About -->
     
