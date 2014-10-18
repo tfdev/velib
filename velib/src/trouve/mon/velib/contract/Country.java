@@ -6,6 +6,7 @@ public enum Country {
 	BE,
 	ES,
 	FR,
+	IE,
 	JP,
 	LT,
 	LU,
@@ -24,6 +25,8 @@ public enum Country {
 			case ES: result = R.drawable.es;
 				break;
 			case FR: result = R.drawable.fr;
+				break;
+			case IE: result = R.drawable.ie;
 				break;
 			case JP: result = R.drawable.jp;
 				break;

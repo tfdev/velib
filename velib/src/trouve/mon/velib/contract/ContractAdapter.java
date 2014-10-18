@@ -50,8 +50,11 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 		String country = contract.getCountry();
 		if( country != null){
 			int res = Country.getDrawableResourceId(country);
-			if(res != -1)
+			if(res != -1){
 				holder.flag.setImageResource(res);
+			}else{
+				holder.flag.setImageResource(android.R.color.transparent);
+			}
 		}
 		
 		return row;
