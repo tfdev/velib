@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">miBici</string>
+    <string name="ok">Guardar</string>
+    <string name="meter">m</string>
+    <string name="kilometer">km</string>
+
+    <!-- Message -->
+
+    <string name="msg_no_gps">Conexión GPS imposible</string>
+    <string name="msg_go_gps">Activar el GPS</string>
+    <string name="msg_check_internet">Verifica tu conexión Internet</string>
+    <string name="msg_no_data">Servicio indisponible</string>
+    <string name="msg_no_station">Ninguna estación</string>
+    <string name="msg_here">aqui</string>
+    <string name="msg_waiting_gps">Esperando informaciones de localización&#8230;</string>
+
+    <!-- Other -->
+
+    <string name="select_city">Selecciona tu ciudad</string>
+
+    <!-- Actions -->
+
+    <string name="action_settings">Cambiar de ciudad</string>
+    <string name="action_refresh">Actualizar</string>
+    <string name="action_favorite">Favoritos</string>
+    <string name="action_about">Acerca de</string>
+
+    <!-- About -->
+    
+    <string name="rate_app">Califica la aplicación</string>
+    <string name="mail_me">Escribirme un mensaje</string>
+    <string name="share_it">Comparte con tus amigos</string>
+    
+</resources>
