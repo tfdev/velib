@@ -33,11 +33,11 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyD56LjxCDfTyZwqjhw7Chgo8Eo-kqFRHXQ" />
-        <!-- AIzaSyDDiPfPD1G3T-YPHBE57ARmm1CpstwYYv0 -->
+            android:value="AIzaSyDDiPfPD1G3T-YPHBE57ARmm1CpstwYYv0" />
+        <!--    android:value="AIzaSyD56LjxCDfTyZwqjhw7Chgo8Eo-kqFRHXQ" -->
 
         <activity
-            android:name="trouve.mon.velib.station.MapActivity"
+            android:name="trouve.mon.velib.MainActivity"
             android:theme="@android:style/Theme.Holo.NoActionBar"
             android:configChanges="orientation"
             android:screenOrientation="portrait" >

@@ -2,8 +2,8 @@ package trouve.mon.velib.contract;
 
 import java.util.List;
 
+import trouve.mon.velib.MainActivity;
 import trouve.mon.velib.R;
-import trouve.mon.velib.station.MapActivity;
 import trouve.mon.velib.util.Helper;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -105,7 +105,7 @@ public class ContractListActivity extends ListActivity {
 	private void startMapActivity(){	
 		Bundle bundle = getIntent().getExtras();
 		if( bundle == null || bundle.getInt(EXTRA_CODE) != REQUEST_CODE_USE_EXISTING_MAP){
-			Intent intent = new Intent(this, MapActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			intent.putExtra(ContractListActivity.EXTRA_CODE, ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY);
 			startActivity(intent);
 		}else{

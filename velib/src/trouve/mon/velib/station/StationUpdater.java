@@ -3,7 +3,9 @@ package trouve.mon.velib.station;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import trouve.mon.velib.MainActivity;
 import trouve.mon.velib.R;
+import trouve.mon.velib.util.Helper;
 import android.util.Log;
 
 public class StationUpdater implements Runnable{
@@ -18,24 +20,26 @@ public class StationUpdater implements Runnable{
 	
 	//-----------------  Instance Fields ------------------
 	
-	private MapActivity mapActivity;
+	private MainActivity mainActivity;
 	private String contractName;
 	
 	//-----------------  Instance Methods ------------------
 	
-	public StationUpdater(MapActivity activity, String contractName) {
-		this.mapActivity = activity;
+	public StationUpdater(MainActivity activity, String contractName) {
+		this.mainActivity = activity;
 		this.contractName = contractName;
 	}
 	
 	public void run() {
+		
 		HttpURLConnection connection = null;
-		mapActivity.runOnUiThread(new Runnable() {
+		mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
-				mapActivity.showRefreshing();
+				mainActivity.showRefreshing();
 			}
 		});
 		try {
+			
 			URL url = new URL(URL_STATION + contractName + API_KEY);
 	        connection = (HttpURLConnection) url.openConnection();
 	        connection.setReadTimeout(10000 /* milliseconds */);
@@ -45,36 +49,37 @@ public class StationUpdater implements Runnable{
 	        connection.connect();
 	        if(connection.getResponseCode() == 200){
 	        	StationParser.parse(connection.getInputStream());
-	        	mapActivity.runOnUiThread(new Runnable() {
+	        	mainActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						mapActivity.getMarkerManager().refreshMarkers(true);
-						mapActivity.refreshDetails();
+						mainActivity.refresh();
 					}
 				});
 	        }
 	        else{
-	        	mapActivity.runOnUiThread(new Runnable() {
+	        	mainActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						mapActivity.showMessage(mapActivity.getString(R.string.msg_no_data)); 
+						Helper.showMessage(mainActivity, mainActivity.getString(R.string.msg_no_data)); 
 					}
 				});
 	        }
 		}
 		catch (Exception e) {
+			
 			Log.e(TAG, "Exception while downloading info", e);
-			mapActivity.runOnUiThread(new Runnable() {
+			mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
-					mapActivity.showMessage(mapActivity.getString(R.string.msg_check_internet));
+					Helper.showMessage(mainActivity, mainActivity.getString(R.string.msg_check_internet));
 				}
 			});
 		}
 		finally{
+			
 			if(connection != null){
 				connection.disconnect();
 			}
-			mapActivity.runOnUiThread(new Runnable() {
+			mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
-					mapActivity.stopRefreshing();
+					mainActivity.stopRefreshing();
 				}
 			});
 		}

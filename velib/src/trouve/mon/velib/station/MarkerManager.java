@@ -16,9 +16,20 @@ public class MarkerManager {
 	enum MarkerSize {
 		TINY, MID, NORMAL, BIG
 	}
+	
+	// ----------------- Static Methods ------------------
+	
+	public static MarkerManager getInstance(GoogleMap map, ResourceFactory delegate){
+		if(INSTANCE == null){
+			INSTANCE = new MarkerManager(map, delegate);
+		}
+		return INSTANCE;
+	}
 
 	// ----------------- Static Fields ------------------
 
+	public static MarkerManager INSTANCE;
+	
 	private static final float HIGHLIGHT_ALPHA = 0.4f;
 	private static final float NORMAL_ALPHA = 1.0f;
 
@@ -41,7 +52,7 @@ public class MarkerManager {
 
 	// ----------------- Constructor ------------------
 
-	public MarkerManager(GoogleMap map, ResourceFactory delegate) {
+	private MarkerManager(GoogleMap map, ResourceFactory delegate) {
 		this.map = map;
 		this.resourceFactory = delegate;
 	}
