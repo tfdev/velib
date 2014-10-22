@@ -2,6 +2,8 @@ package trouve.mon.velib.station;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -18,15 +20,22 @@ public class LocationClientDelegate {
 	
 	//----------------- Static methods ------------------
 	
-	public static LocationClient getClient(Context c){
+	public static LocationClient getClient(Context c, FragmentManager fm){
 
-		if (locationClient == null) {
+		if (locationClient == null) {	
 			context = c;
+			fragmentManager = fm;
 			locationClient = new LocationClient(context, new Listener(),  // ConnectionCallbacks
 														new Listener()); // OnConnectionFailedListener    
-			locationClient.connect();
 		}
 		
+		return locationClient;
+	}
+	
+	/**
+	 * @return can be null!!!
+	 */
+	public static LocationClient getClient(){
 		return locationClient;
 	}
 	
@@ -49,6 +58,7 @@ public class LocationClientDelegate {
 	
 	private static Context context;	
 	private static LocationClient locationClient;
+	private static FragmentManager fragmentManager;
 	
 	//----------------- Instance methods ------------------
 	
@@ -64,23 +74,29 @@ public class LocationClientDelegate {
 											OnConnectionFailedListener{
 		
 		
-	    private static final LocationRequest REQUEST = LocationRequest.create()
-				  .setInterval(5000)
-				  .setFastestInterval(16)
-				  .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	    private static final LocationRequest REQUEST = LocationRequest.create().setInterval(5000)
+													  .setFastestInterval(16)
+													  .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	    
-	
 		@Override
 		public void onConnectionFailed(ConnectionResult result) {
 			Helper.showMessage(context, context.getString(R.string.msg_no_gps));
 		}
+		
 		@Override
 		public void onConnected(Bundle connectionHint) {
 			locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
+			Fragment fragment = fragmentManager.findFragmentByTag(GoogleMapFragment.MAP_FRAGMENT_TAG);
+			if(fragment != null){
+				GoogleMapFragment mapFragment = (GoogleMapFragment) fragment;
+				mapFragment.centerMapOnMyLocation(false);
+			}
 		}
+		
 		@Override
 		public void onDisconnected() {
 		}
+		
 		@Override
 		public void onLocationChanged(Location location) {
 		}

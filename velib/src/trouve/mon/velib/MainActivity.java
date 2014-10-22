@@ -17,8 +17,10 @@ import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,8 +37,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	//----------------- Static Fields ------------------
 
 	private static final long REFRESH_PERIOD = 60; //SECONDS
-	private static final String MAP_FRAGMENT_TAG = "MAP";
-
+	private static final String TAB_FAVORITES = "FAVORITES";
+	private static final String TAB_NEARBY = "NEARBY";
+	private static final String TAB_MAP = "MAP";
 	
     //-----------------  Instance Fields ------------------
 	
@@ -60,44 +63,28 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if(Helper.getPreferredContract(this) == null){
+        	startConfigActivity(false);
+        	return;
+        }
+		
 		loadFavorites();
 		setActionBarTitle();
-		
-	    // Notice that setContentView() is not used, because we use the root
-	    // android.R.id.content as the container for each fragment
-
-	    // setup action bar for tabs
-	    ActionBar actionBar = getActionBar();
-	    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-	    actionBar.setDisplayShowTitleEnabled(false);
-
-	    Tab tab = actionBar.newTab()
-	                       .setText("map") // TODO
-	                       .setTabListener(this);
-	    actionBar.addTab(tab);
+		setActionBarTabs();   
 	}
 	
 	@Override
     public void onResume() {
         super.onResume();
-        if(Helper.getPreferredContract(this) == null){
-        	startConfigActivity(false);
-        }
-        else{
-        	setUpAndConnectLocationClient();
-            scheduleUpdateData();
-        }
+        setUpAndConnectLocationClient();
+        scheduleUpdateData();
     }
 
 	@Override
     public void onPause() {
         super.onPause();
-        if (locationClient != null) {
-            locationClient.disconnect();
-        }
-        if(scheduledRefresh != null){
-        	scheduledRefresh.cancel(true);
-        }
+        disconnectLocationClient();
+        cancelUpdateData();
     }
 	
 	@Override
@@ -143,18 +130,35 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	
 	private void setUpAndConnectLocationClient() {
         if(locationClient == null){
-        	locationClient = LocationClientDelegate.getClient(getApplicationContext());
+        	locationClient = LocationClientDelegate.getClient(getApplicationContext(), getFragmentManager());
+        }
+        locationClient.connect();
+    }
+	
+	private void disconnectLocationClient() {
+        if(locationClient != null){
+        	locationClient.disconnect();
         }
     }
 	
 	private void setActionBarTitle(){
 		setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = getActionBar();
-		actionBar.setTitle(Helper.getPreferredContract(this));
-		actionBar.setSubtitle(Helper.getPreferredService(this));
+		actionBar.setTitle(Helper.getPreferredService(this));
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(false);
+	}
+	
+	private void setActionBarTabs(){
+	    ActionBar actionBar = getActionBar();
+	    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+	    Tab tab = actionBar.newTab()
+	    					.setTag("MAP")
+	    					.setIcon(R.drawable.ic_action_map)
+	    					.setTabListener(this);
+	    actionBar.addTab(tab);
 	}
 	
 	private void startConfigActivity(boolean keepActivity){
@@ -168,21 +172,18 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 		}
 	}
 	
+	// TODO show a info bar 
+	public boolean isGpsEnabled(){
+		final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+   }
+	
 	// Needs to be called from onCreate()
 	// before any station has been loaded
 	private void loadFavorites(){
 		StationManager.INSTANCE.setFavorites(Helper.getFavoriteSharedPreferences(this).getAll());
 	}
 	
-	public void refresh(){
-		if(mapFragment != null){
-			mapFragment.refresh();
-		}
-		
-		if(detailFragment != null){
-			detailFragment.refresh();
-		}
-	}
 	
 	public void reset(){
 		setActionBarTitle();
@@ -195,6 +196,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	}
 	
 	//----------------- Refresh logic ------------------
+	
+	public void refresh(){
+		if(mapFragment != null){
+			mapFragment.refresh();
+		}
+		
+		if(detailFragment != null){
+			detailFragment.refresh();
+		}
+	}
 	
 	private void startRefresh(){
 		if(!refreshing){
@@ -226,10 +237,14 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
     }
     
 	private void scheduleUpdateData(){
+		cancelUpdateData();
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(new StationUpdater(this, Helper.getPreferredContract(this)), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+	}
+	
+	private void cancelUpdateData(){
 		if(scheduledRefresh != null){
         	scheduledRefresh.cancel(true);
         }
-		scheduledRefresh = scheduler.scheduleWithFixedDelay(new StationUpdater(this, Helper.getPreferredContract(this)), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
 	/*private void startAboutActivity() {
@@ -250,17 +265,41 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	
 	public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
 
-		if(mapFragment == null){
-            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
+		if(TAB_MAP.equals(tab.getTag()) ){
+			if(mapFragment == null){
+	            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
+			}
+			if(detailFragment == null){
+				detailFragment = (DetailFragment) Fragment.instantiate(this, DetailFragment.class.getName());
+			}
+	            
+			fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.MAP_FRAGMENT_TAG);
+			fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.DETAIL_FRAGMENT_TAG);
 		}
-            
-		fragmentTransaction.add(android.R.id.content, mapFragment, MAP_FRAGMENT_TAG);
-    }
+		else if(TAB_FAVORITES.equals(tab.getTag())){
+			
+		}
+		else if(TAB_NEARBY.equals(tab.getTag())){
+			
+		}
+	}
 
     public void onTabUnselected(Tab tab, FragmentTransaction fragmentTransaction) {
-        if (mapFragment != null) {
-            fragmentTransaction.remove(mapFragment);
-        }
+    	
+    	if(TAB_MAP.equals(tab.getTag()) ){
+	        if (mapFragment != null) {
+	            fragmentTransaction.remove(mapFragment);
+	        }
+	        if (detailFragment != null) {
+	            fragmentTransaction.remove(detailFragment);
+	        }
+    	}
+    	else if(TAB_FAVORITES.equals(tab.getTag())){
+			
+		}
+		else if(TAB_NEARBY.equals(tab.getTag())){
+			
+		}
     }
 
     public void onTabReselected(Tab tab, FragmentTransaction ft) {

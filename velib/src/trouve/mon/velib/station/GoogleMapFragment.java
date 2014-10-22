@@ -3,17 +3,13 @@ package trouve.mon.velib.station;
 import trouve.mon.velib.R;
 import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.util.Helper;
-import android.content.Context;
+import android.app.Fragment;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,8 +34,9 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	
 	//----------------- Static Fields ------------------
 	
-	private static final String TAG = GoogleMapFragment.class.getName();
+	//private static final String TAG = GoogleMapFragment.class.getName();
 	
+	public static final String MAP_FRAGMENT_TAG = "MAP";
 	private static final float CENTER_ZOOM_LEVEL = 15.5f;
 
     
@@ -50,10 +47,8 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
     
 	private boolean centering = false;
 	
-	private View locationButton;
-	
 	private MarkerManager markerManager;
-	private LocationClient locationClient;
+
 	
 	//-----------------  Fragment Lifecycle ------------------
 	
@@ -63,8 +58,6 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		setUpResourceDelegate();
-		horribleHackToMoveMyLocationButton();
-		//setUpStationDetailView();
 		return view;
 	}
 
@@ -72,45 +65,19 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
     public void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-        setUpLocationClient();
     }
 
 	@Override
     public void onPause() {
         super.onPause();
         if(markerManager != null){
-        	hideDetails();
+        	unhighlightMarker();
         }
     }
 	
 	
 
-	//-----------------  Instance Methods ------------------
-	
-	//TODO fixme
-	/*
-	private void retrieveExtraInfo(){
-		Bundle bundle = getIntent().getExtras();
-		if( bundle != null && 
-			bundle.getInt(ContractListActivity.EXTRA_CODE) == ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY){
-			actionIfNoStation = true;
-		}
-	}*/
-	
-	private void setUpLocationClient(){
-		if(locationClient == null){
-			locationClient = LocationClientDelegate.getClient(getActivity());
-			locationClient.registerConnectionCallbacks(new ConnectionCallbacks() {
-				
-				public void onDisconnected() {
-				}
-				
-				public void onConnected(Bundle connectionHint) {
-					centerMapOnMyLocation(false);
-				}
-			});
-		}
-	}
+	//-----------------  public methods ------------------
 	
 	public void refresh(){
 		markerManager.refreshMarkers(true);
@@ -121,27 +88,61 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 		markerManager.actionIfNoStation = true;
 	}
 	
-    private void setUpResourceDelegate(){
-    	if(resourceFactory == null){
-    		resourceFactory = new ResourceFactory(getResources());
+	public void centerMapOnMyLocation(boolean animateCamera){
+		LocationClient locationClient = LocationClientDelegate.getClient();
+    	if(locationClient != null){
+    		Location lastLocation = locationClient.getLastLocation();
+    		if(lastLocation != null){
+    			unhighlightMarker();
+        		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        		if(animateCamera)
+        			map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
+        		else
+        			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
+    		}
+    		else {
+    			Helper.showMessage(getActivity(), getString(R.string.msg_waiting_gps));
+    		}
     	}
     }
 	
-	private void showDetails(Marker marker){	
+	//-----------------  private methods ------------------
+	
+	private DetailFragment getDetailFragment(){
+		DetailFragment detailFragment = null;
+		Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
+		if(fragment != null){
+			detailFragment = (DetailFragment) fragment;
+		}
+		return detailFragment;
+	}
+	
+    private void setUpResourceDelegate(){
+    	if(resourceFactory == null){
+    		resourceFactory = ResourceFactory.getInstance(getResources());
+    	}
+    }
+	
+	private void highlightMarker(Marker marker){	
 		int stationNumber = Integer.parseInt(marker.getTitle());
 		Station station = StationManager.INSTANCE.get(stationNumber);
 		centerMap(station);
 		
 		markerManager.highlightMarker(stationNumber);
 		
-		// setDetailViewVisible(true);
-		// TODO call DetailFragment.show(station)
+		DetailFragment detailFragment = getDetailFragment();
+		if(detailFragment != null){
+			detailFragment.show(marker);
+		}
 	}
 	
-	private void hideDetails() {
+	private void unhighlightMarker() {
 		if(markerManager.detailing){
-			//setDetailViewVisible(false);
 			markerManager.unhighlightMarker();
+			DetailFragment detailFragment = getDetailFragment();
+			if(detailFragment != null){
+				detailFragment.hide();
+			}
 		}
 	}	
 	
@@ -150,6 +151,32 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 		map.animateCamera(CameraUpdateFactory.newLatLng(station.getPosition()), 500, null);
 	}
 	
+	private void setUpMapIfNeeded() {
+        if (map == null) {
+            map = getMap();
+            if (map != null) {
+            	markerManager = MarkerManager.getInstance(map, resourceFactory);
+                map.setMyLocationEnabled(true);
+                map.setOnMyLocationButtonClickListener(this);
+                map.getUiSettings().setZoomControlsEnabled(false);
+                map.setOnCameraChangeListener(this);
+                map.setOnMarkerClickListener(this);
+                map.setOnMapClickListener(this);
+                map.setOnMapLongClickListener(this);
+            }
+        }
+    }
+
+	
+	//TODO fixme
+		/*
+		private void retrieveExtraInfo(){
+			Bundle bundle = getIntent().getExtras();
+			if( bundle != null && 
+				bundle.getInt(ContractListActivity.EXTRA_CODE) == ContractListActivity.REQUEST_CODE_MOVE_AWAY_IF_EMPTY){
+				actionIfNoStation = true;
+			}
+		}*/
 	
 	/*
 	private void moveMyLocationButton(boolean detailViewVisible) {  
@@ -162,7 +189,7 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	    catch(Exception e){
 	    	Log.e(TAG, "not able to move myLocation button", e);
 	    }
-	}*/
+	}
 	
 	private void horribleHackToMoveMyLocationButton() {
 	    View mapView = getActivity().findViewById(R.id.map);
@@ -179,51 +206,9 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	    catch(Exception e){
 	    	Log.e(TAG, "not able to move myLocation button", e);
 	    }
-	}
+	}*/
 	
-    private void setUpMapIfNeeded() {
-        if (map == null) {
-            map = getMap();
-            if (map != null) {
-            	markerManager = MarkerManager.getInstance(map, resourceFactory);
-                map.setMyLocationEnabled(true);
-                map.setOnMyLocationButtonClickListener(this);
-                map.getUiSettings().setZoomControlsEnabled(false);
-                map.setOnCameraChangeListener(this);
-                map.setOnMarkerClickListener(this);
-                map.setOnMapClickListener(this);
-                map.setOnMapLongClickListener(this);
-            }
-        }
-    }
-     
-
-    private boolean isGpsEnabled(){
-    	 final LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-    	 return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
     
-    
-    private void centerMapOnMyLocation(boolean animateCamera){
-    	if(!isGpsEnabled()){
-    		Helper.showMessage(getActivity(), getString(R.string.msg_go_gps));
-    	}
-    	if(locationClient != null){
-    		Location lastLocation = locationClient.getLastLocation();
-    		if(lastLocation != null){
-    			hideDetails();
-        		LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-        		if(animateCamera)
-        			map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
-        		else
-        			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
-    		}
-    		else {
-    			Helper.showMessage(getActivity(), getString(R.string.msg_waiting_gps));
-    		}
-    	}
-    }
-
 	
 	//----------------- Interface Implementation ------------------
     
@@ -237,25 +222,25 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	public void onCameraChange(CameraPosition position) {
 		markerManager.refreshMarkers(false);
 		if(!centering){
-			hideDetails();
+			unhighlightMarker();
 		}
 		centering = false;
 	}
 
 	@Override
 	public boolean onMarkerClick(Marker marker) {
-		showDetails(marker);
+		highlightMarker(marker);
 		return true;
 	}
 
 	@Override
 	public void onMapClick(LatLng point) {
-		hideDetails();
+		unhighlightMarker();
 	}
 
 	@Override
 	public void onMapLongClick(LatLng point) {
-		hideDetails();
+		unhighlightMarker();
 	}
 
 

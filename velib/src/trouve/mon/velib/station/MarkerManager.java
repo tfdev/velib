@@ -28,7 +28,7 @@ public class MarkerManager {
 
 	// ----------------- Static Fields ------------------
 
-	public static MarkerManager INSTANCE;
+	private static MarkerManager INSTANCE;
 	
 	private static final float HIGHLIGHT_ALPHA = 0.4f;
 	private static final float NORMAL_ALPHA = 1.0f;

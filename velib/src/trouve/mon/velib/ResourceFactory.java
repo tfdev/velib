@@ -14,9 +14,20 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 public class ResourceFactory {
+	
+	// ----------------- Class Methods ------------------
+	
+	public static ResourceFactory getInstance(Resources resources){
+		if(INSTANCE == null){
+			INSTANCE = new ResourceFactory(resources);
+		}
+		return INSTANCE;
+	}
 
 	// ----------------- Class Fields ------------------
 
+	private static ResourceFactory INSTANCE ;
+	
 	public static final int RED = Color.rgb(181, 12, 22);
 	public static final int ORANGE = Color.rgb(215, 119, 34);
 	public static final int GREEN = Color.rgb(133, 161, 82);
@@ -53,7 +64,7 @@ public class ResourceFactory {
 
 	// ----------------- Instance Methods ------------------
 
-	public ResourceFactory(Resources resources) {
+	private ResourceFactory(Resources resources) {
 		this.resources = resources;
 	}
 

@@ -1,6 +1,8 @@
 package trouve.mon.velib.station;
 
+
 import trouve.mon.velib.R;
+import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.util.Formatter;
 import trouve.mon.velib.util.Helper;
 import android.app.Fragment;
@@ -9,12 +11,19 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class DetailFragment extends Fragment{
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.Marker;
 
+public class DetailFragment extends Fragment {
+
+	//----------------- Static Fields ------------------
+	
+	public static final String DETAIL_FRAGMENT_TAG = "DETAIL";
 	
 	//-----------------  Instance Fields ------------------
 	
@@ -30,6 +39,7 @@ public class DetailFragment extends Fragment{
 	private ImageButton favImageView;
 	
 	private MarkerManager markerManager;
+
 	
 	
 	//-----------------  Fragment Lifecycle ------------------
@@ -41,25 +51,55 @@ public class DetailFragment extends Fragment{
 		return rootView;
 	}
 	
+	@Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+	@Override
+    public void onPause() {
+        super.onPause();
+
+    }
 	
 	//-----------------  public methods ------------------
 	
 	public void refresh(){
-		if(markerManager.detailing){
-			updateDetailInfo(StationManager.INSTANCE.get(markerManager.detailedStationNumber));
+		if(getMarkerManager().detailing){
+			updateDetailInfo(StationManager.INSTANCE.get(getMarkerManager().detailedStationNumber));
 		}
 	}
 	
-	public void show(Station station){
+	public void show(Marker marker){
+		int stationNumber = Integer.parseInt(marker.getTitle());
+		Station station = StationManager.INSTANCE.get(stationNumber);
 		setFavImageOnDetailView(station);
 		updateDetailInfo(station);
+		setDetailViewVisible(true);
 	}
+	
+	public void hide(){
+		setDetailViewVisible(false);
+	}
+
 	
 	//-----------------  private methods ------------------
 	
+
+	private MarkerManager getMarkerManager(){
+		if(markerManager == null){
+			Fragment fragment = getFragmentManager().findFragmentByTag(GoogleMapFragment.MAP_FRAGMENT_TAG);
+			if(fragment != null){
+				MapFragment mapFragment = (MapFragment) fragment;
+				markerManager = MarkerManager.getInstance(mapFragment.getMap(), ResourceFactory.getInstance(getResources()));
+			}
+		}
+		return markerManager;
+	}
+	
 	private void setUpStationDetailView(){
 		
-		markerManager = MarkerManager.INSTANCE;
 		detailContainerView = rootView.findViewById(R.id.detail_layout);
 		detailContainerView.setVisibility(View.INVISIBLE);
 		detailContainerView.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +116,7 @@ public class DetailFragment extends Fragment{
 		favImageView.setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
-				Station station = StationManager.INSTANCE.get(markerManager.detailedStationNumber);
+				Station station = StationManager.INSTANCE.get(getMarkerManager().detailedStationNumber);
 				setFavorite(station, !station.isFavorite());
 				setFavImageOnDetailView(station);
 			}
@@ -91,7 +131,7 @@ public class DetailFragment extends Fragment{
 	
 	private void setFavorite(Station station, boolean isFavorite){
 		station.setFavorite(isFavorite);
-		markerManager.updateMarker(station);
+		getMarkerManager().updateMarker(station);
 		SharedPreferences.Editor editor = Helper.getFavoriteSharedPreferences(getActivity()).edit();
 		if(isFavorite){
 			editor.putBoolean(String.valueOf(station.getNumber()), true);
@@ -124,9 +164,9 @@ public class DetailFragment extends Fragment{
 		
 		stationTextView.setText(station.toString());
 	}
+
 	
-	/*
-	public void slideToTop(View view) {
+	private void slideToTop(View view) {
 		if (view.getVisibility() != View.VISIBLE) {
 			TranslateAnimation animate = new TranslateAnimation(0, 0, view.getHeight(), 0);
 			animate.setDuration(500);
@@ -135,7 +175,7 @@ public class DetailFragment extends Fragment{
 		}
 	}
 
-	public void slideToBottom(View view) {
+	private void slideToBottom(View view) {
 		TranslateAnimation animate = new TranslateAnimation(0, 0, 0, view.getHeight());
 		animate.setDuration(500);
 		view.startAnimation(animate);
@@ -143,13 +183,15 @@ public class DetailFragment extends Fragment{
 	}
 	
 	private void setDetailViewVisible(boolean visible){
-		moveMyLocationButton(visible);
+		//moveMyLocationButton(visible);
 		if(visible){
 			slideToTop(detailContainerView);
 		}else{
 			slideToBottom(detailContainerView);
 		}
-	}*/
+	}
 	
+	//-----------------  Interface implementation ------------------
+
 	
 }
