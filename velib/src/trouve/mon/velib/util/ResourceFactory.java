@@ -1,5 +1,6 @@
-package trouve.mon.velib;
+package trouve.mon.velib.util;
 
+import trouve.mon.velib.R;
 import trouve.mon.velib.station.Station;
 import trouve.mon.velib.station.Status;
 import android.content.res.Resources;
@@ -71,7 +72,7 @@ public class ResourceFactory {
 	private Resources getResources() {
 		return resources;
 	}
-
+	
 	public BitmapDescriptor getFav() {
 		if (fav == null) {
 			Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_important, null);

@@ -8,20 +8,23 @@ import java.util.concurrent.TimeUnit;
 import trouve.mon.velib.contract.ContractListActivity;
 import trouve.mon.velib.station.DetailFragment;
 import trouve.mon.velib.station.GoogleMapFragment;
-import trouve.mon.velib.station.LocationClientDelegate;
+import trouve.mon.velib.station.FavoriteListFragment;
+import trouve.mon.velib.station.NearbyListFragment;
 import trouve.mon.velib.station.StationManager;
 import trouve.mon.velib.station.StationUpdater;
 import trouve.mon.velib.util.Helper;
+import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.MyPreferenceManager;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,7 +35,7 @@ import android.view.animation.AnimationUtils;
 
 import com.google.android.gms.location.LocationClient;
 
-public class MainActivity extends Activity implements ActionBar.TabListener{
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener{
 
 	//----------------- Static Fields ------------------
 
@@ -55,6 +58,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	
 	private GoogleMapFragment mapFragment;
 	private DetailFragment detailFragment;
+	private FavoriteListFragment favoriteFragment;
+	private NearbyListFragment nearbyFragment;
 	
 	private LocationClient locationClient;
 	
@@ -63,7 +68,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if(Helper.getPreferredContract(this) == null){
+		
+		Helper.setUp(getApplicationContext());
+		MyPreferenceManager.setUp(getApplicationContext());
+		if(MyPreferenceManager.getPreferredContract() == null){
         	startConfigActivity(false);
         	return;
         }
@@ -130,7 +138,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	
 	private void setUpAndConnectLocationClient() {
         if(locationClient == null){
-        	locationClient = LocationClientDelegate.getClient(getApplicationContext(), getFragmentManager());
+        	locationClient = LocationClientSingleton.setUp(getApplicationContext(), getSupportFragmentManager());
         }
         locationClient.connect();
     }
@@ -144,7 +152,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	private void setActionBarTitle(){
 		setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = getActionBar();
-		actionBar.setTitle(Helper.getPreferredService(this));
+		actionBar.setTitle(MyPreferenceManager.getPreferredService());
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(false);
@@ -155,9 +163,19 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 	    Tab tab = actionBar.newTab()
-	    					.setTag("MAP")
+	    					.setTag(TAB_MAP)
 	    					.setIcon(R.drawable.ic_action_map)
 	    					.setTabListener(this);
+	    actionBar.addTab(tab);
+	    tab = actionBar.newTab()
+				.setTag(TAB_FAVORITES)
+				.setIcon(R.drawable.ic_action_important)
+				.setTabListener(this);
+	    actionBar.addTab(tab);
+	    tab = actionBar.newTab()
+				.setTag(TAB_NEARBY)
+				.setIcon(R.drawable.ic_action_place)
+				.setTabListener(this);
 	    actionBar.addTab(tab);
 	}
 	
@@ -181,7 +199,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 	// Needs to be called from onCreate()
 	// before any station has been loaded
 	private void loadFavorites(){
-		StationManager.INSTANCE.setFavorites(Helper.getFavoriteSharedPreferences(this).getAll());
+		StationManager.INSTANCE.loadFavorites();
 	}
 	
 	
@@ -204,6 +222,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 		
 		if(detailFragment != null){
 			detailFragment.refresh();
+		}
+		
+		if(favoriteFragment != null){
+			favoriteFragment.refresh();
 		}
 	}
 	
@@ -238,7 +260,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
     
 	private void scheduleUpdateData(){
 		cancelUpdateData();
-		scheduledRefresh = scheduler.scheduleWithFixedDelay(new StationUpdater(this, Helper.getPreferredContract(this)), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
+		scheduledRefresh = scheduler.scheduleWithFixedDelay(new StationUpdater(this, MyPreferenceManager.getPreferredContract()), 0, REFRESH_PERIOD, TimeUnit.SECONDS);
 	}
 	
 	private void cancelUpdateData(){
@@ -263,43 +285,68 @@ public class MainActivity extends Activity implements ActionBar.TabListener{
 		}
 	}
 	
-	public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 
+		android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		
 		if(TAB_MAP.equals(tab.getTag()) ){
 			if(mapFragment == null){
 	            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
+	            fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.MAP_FRAGMENT_TAG);
+			}else{
+				fragmentTransaction.attach(mapFragment);
 			}
 			if(detailFragment == null){
 				detailFragment = (DetailFragment) Fragment.instantiate(this, DetailFragment.class.getName());
+				fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.DETAIL_FRAGMENT_TAG);
+			}else{
+				fragmentTransaction.attach(detailFragment);
 			}
-	            
-			fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.MAP_FRAGMENT_TAG);
-			fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.DETAIL_FRAGMENT_TAG);
 		}
 		else if(TAB_FAVORITES.equals(tab.getTag())){
-			
+			if(favoriteFragment == null){
+				favoriteFragment = (FavoriteListFragment) Fragment.instantiate(this, FavoriteListFragment.class.getName());
+				fragmentTransaction.add(android.R.id.content, favoriteFragment, FavoriteListFragment.FAVORITE_FRAGMENT_TAG);
+			}else{
+				fragmentTransaction.attach(favoriteFragment);
+			}
 		}
 		else if(TAB_NEARBY.equals(tab.getTag())){
-			
+			if(nearbyFragment == null){
+				nearbyFragment = (NearbyListFragment) Fragment.instantiate(this, NearbyListFragment.class.getName());
+				fragmentTransaction.add(android.R.id.content, nearbyFragment, NearbyListFragment.NEARBY_FRAGMENT_TAG);
+			}else{
+				fragmentTransaction.attach(nearbyFragment);
+			}
 		}
+		
+		fragmentTransaction.commit();
 	}
 
-    public void onTabUnselected(Tab tab, FragmentTransaction fragmentTransaction) {
+    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
     	
+    	android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		
     	if(TAB_MAP.equals(tab.getTag()) ){
 	        if (mapFragment != null) {
-	            fragmentTransaction.remove(mapFragment);
+	            fragmentTransaction.detach(mapFragment);
 	        }
 	        if (detailFragment != null) {
-	            fragmentTransaction.remove(detailFragment);
+	            fragmentTransaction.detach(detailFragment);
 	        }
     	}
     	else if(TAB_FAVORITES.equals(tab.getTag())){
-			
+			if(favoriteFragment != null){
+				fragmentTransaction.detach(favoriteFragment);
+			}
 		}
 		else if(TAB_NEARBY.equals(tab.getTag())){
-			
+			if(nearbyFragment != null){
+				fragmentTransaction.detach(nearbyFragment);
+			}
 		}
+    	
+    	fragmentTransaction.commit();
     }
 
     public void onTabReselected(Tab tab, FragmentTransaction ft) {

@@ -1,16 +1,21 @@
 package trouve.mon.velib.util;
 
+import java.text.DecimalFormat;
+
 import trouve.mon.velib.R;
-import trouve.mon.velib.contract.Contract;
-import trouve.mon.velib.station.Station;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.widget.Toast;
 
 public class Helper {
 
+	public static void setUp(Context c){
+		context = c;
+	}
+	
+	private static Context context;
+	
 	public static final void setUpActionBarCustomTheme(Activity activity) {
 		activity.setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = activity.getActionBar();
@@ -19,24 +24,52 @@ public class Helper {
 	    actionBar.setDisplayUseLogoEnabled(true);
 	}
 	
-	public static String getPreferredContract(Context activity){
-		SharedPreferences settings = activity.getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, Context.MODE_PRIVATE);
-	    String preferredContract = settings.getString(Contract.CONTRACT_PREFERENCE_KEY, null);
-	    return preferredContract;
+	public static void showMessageQuick(int resId) {
+		Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show();
 	}
 	
-	public static SharedPreferences getFavoriteSharedPreferences(Context activity){
-		String contract = getPreferredContract(activity);
-	    return activity.getSharedPreferences(Station.KEY_FAVORITE + contract, Context.MODE_PRIVATE);
+	public static void showMessageQuick(String msg) {
+		Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 	}
 	
-	public static String getPreferredService(Context activity){
-		SharedPreferences settings = activity.getSharedPreferences(Contract.CONTRACT_PREFERENCE_KEY, Context.MODE_PRIVATE);
-	    String service = settings.getString(Contract.SERVICE_PREFERENCE_KEY, null);
-	    return service;
+	public static void showMessageLong(int resId) {
+		Toast.makeText(context, context.getString(resId), Toast.LENGTH_LONG).show();
 	}
 	
-	public static void showMessage(Context context, String msg) {
+	public static void showMessageLong(String msg) {
 		Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+	}
+	
+	public static String formatDistance(int meters){
+		String distanceString = "";
+		if(meters != 0){
+			if(meters < 1000){
+				distanceString = String.format("%d", meters)+ context.getString(R.string.meter);
+			}
+			else{
+				float km = ((float)meters) / 1000;
+				DecimalFormat decimalFormat = new DecimalFormat("#.#");
+				distanceString = decimalFormat.format(km) + context.getString(R.string.kilometer);
+			}
+				
+		}
+		return distanceString;
+	}
+	
+
+	public static String formatName(String name){
+		String formattedName = "";
+		if(name != null){
+			if(name.indexOf('-') != -1){
+                formattedName = name.substring(name.indexOf('-')+2);
+            }
+            else if(name.indexOf('_') != -1){
+                formattedName = name.substring(name.indexOf('_')+1);
+            }
+            else{
+            	formattedName = name;
+            }
+		}
+		return formattedName;
 	}
 }

@@ -1,12 +1,13 @@
-package trouve.mon.velib.station;
+package trouve.mon.velib.util;
 
 import trouve.mon.velib.R;
-import trouve.mon.velib.util.Helper;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import trouve.mon.velib.station.GoogleMapFragment;
+import trouve.mon.velib.station.Station;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -14,40 +15,32 @@ import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailed
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.model.LatLng;
 
-public class LocationClientDelegate {
+public class LocationClientSingleton {
 	
 	//----------------- Static methods ------------------
 	
-	public static LocationClient getClient(Context c, FragmentManager fm){
-
-		if (locationClient == null) {	
-			context = c;
-			fragmentManager = fm;
-			locationClient = new LocationClient(context, new Listener(),  // ConnectionCallbacks
-														new Listener()); // OnConnectionFailedListener    
-		}
-		
+	public static LocationClient setUp(Context c, FragmentManager fm){
+		context = c;
+		fragmentManager = fm;
+		locationClient = new LocationClient(context, new Listener(),  // ConnectionCallbacks
+													 new Listener()); // OnConnectionFailedListener   
 		return locationClient;
 	}
 	
-	/**
-	 * @return can be null!!!
-	 */
+	
 	public static LocationClient getClient(){
 		return locationClient;
 	}
 	
 	public static int distanceFromLastLocation(Station station){
-    	if(locationClient != null){
+    	if(locationClient != null && locationClient.isConnected()){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
-    			LatLng latLng = station.getPosition();
-    			float[] results = new float[1];
-    			Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), 
-    					latLng.latitude, latLng.longitude, results);
-    			return Math.round(results[0]);
+    			float result = lastLocation.distanceTo(station.getLocation());
+    			int d = Math.round(result);
+    			station.setDistanceFromLocation(d);
+    			return d;
     		}
     	}
     	return 0;
@@ -62,7 +55,7 @@ public class LocationClientDelegate {
 	
 	//----------------- Instance methods ------------------
 	
-	private LocationClientDelegate(){
+	private LocationClientSingleton(){
 		
 	}
 	
@@ -80,7 +73,7 @@ public class LocationClientDelegate {
 	    
 		@Override
 		public void onConnectionFailed(ConnectionResult result) {
-			Helper.showMessage(context, context.getString(R.string.msg_no_gps));
+			Helper.showMessageLong(R.string.msg_no_gps);
 		}
 		
 		@Override

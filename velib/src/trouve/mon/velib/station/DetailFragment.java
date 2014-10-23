@@ -2,12 +2,11 @@ package trouve.mon.velib.station;
 
 
 import trouve.mon.velib.R;
-import trouve.mon.velib.ResourceFactory;
-import trouve.mon.velib.util.Formatter;
 import trouve.mon.velib.util.Helper;
-import android.app.Fragment;
-import android.content.SharedPreferences;
+import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.ResourceFactory;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.MapFragment;
+
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
 
 public class DetailFragment extends Fragment {
@@ -91,7 +91,7 @@ public class DetailFragment extends Fragment {
 		if(markerManager == null){
 			Fragment fragment = getFragmentManager().findFragmentByTag(GoogleMapFragment.MAP_FRAGMENT_TAG);
 			if(fragment != null){
-				MapFragment mapFragment = (MapFragment) fragment;
+				SupportMapFragment mapFragment = (SupportMapFragment) fragment;
 				markerManager = MarkerManager.getInstance(mapFragment.getMap(), ResourceFactory.getInstance(getResources()));
 			}
 		}
@@ -129,16 +129,9 @@ public class DetailFragment extends Fragment {
 		standImageView.setColorFilter(color);
 	}
 	
-	private void setFavorite(Station station, boolean isFavorite){
-		station.setFavorite(isFavorite);
+	private void setFavorite(Station station, boolean newValue){
+		StationManager.INSTANCE.setFavorite(station, newValue);
 		getMarkerManager().updateMarker(station);
-		SharedPreferences.Editor editor = Helper.getFavoriteSharedPreferences(getActivity()).edit();
-		if(isFavorite){
-			editor.putBoolean(String.valueOf(station.getNumber()), true);
-		}else{
-			editor.remove(String.valueOf(station.getNumber()));
-		}
-		editor.apply();
 	}
 	
 	private void setFavImageOnDetailView(Station station){
@@ -149,8 +142,8 @@ public class DetailFragment extends Fragment {
 	}
 	
 	private void displayDistanceDetail(Station station){
-		int distance = LocationClientDelegate.distanceFromLastLocation(station);
-		distanceTextView.setText(Formatter.formatDistance(distance, getActivity()));
+		int distance = LocationClientSingleton.distanceFromLastLocation(station);
+		distanceTextView.setText(Helper.formatDistance(distance));
 	}
 	
 	private void updateDetailInfo(Station station) {

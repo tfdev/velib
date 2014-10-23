@@ -1,9 +1,9 @@
 package trouve.mon.velib.station;
 
 import trouve.mon.velib.R;
-import trouve.mon.velib.ResourceFactory;
 import trouve.mon.velib.util.Helper;
-import android.app.Fragment;
+import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.ResourceFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,13 +18,13 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 
-public class GoogleMapFragment extends MapFragment implements OnMyLocationButtonClickListener, 
+public class GoogleMapFragment extends SupportMapFragment implements OnMyLocationButtonClickListener, 
 															OnCameraChangeListener, 
 															OnMarkerClickListener, 
 															OnMapClickListener, 
@@ -89,7 +89,7 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	}
 	
 	public void centerMapOnMyLocation(boolean animateCamera){
-		LocationClient locationClient = LocationClientDelegate.getClient();
+		LocationClient locationClient = LocationClientSingleton.getClient();
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
@@ -101,7 +101,7 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
         			map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CENTER_ZOOM_LEVEL));
     		}
     		else {
-    			Helper.showMessage(getActivity(), getString(R.string.msg_waiting_gps));
+    			Helper.showMessageLong(R.string.msg_waiting_gps);
     		}
     	}
     }
@@ -110,7 +110,7 @@ public class GoogleMapFragment extends MapFragment implements OnMyLocationButton
 	
 	private DetailFragment getDetailFragment(){
 		DetailFragment detailFragment = null;
-		Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
+		android.support.v4.app.Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
 		if(fragment != null){
 			detailFragment = (DetailFragment) fragment;
 		}

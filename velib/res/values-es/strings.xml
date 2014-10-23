@@ -13,9 +13,13 @@
     <string name="msg_check_internet">Verifica tu conexión Internet</string>
     <string name="msg_no_data">Servicio indisponible</string>
     <string name="msg_no_station">Ninguna estación</string>
-    <string name="msg_here">aqui</string>
+    <string name="msg_here">aquí</string>
     <string name="msg_waiting_gps">Esperando informaciones de localización&#8230;</string>
 
+    <string name="fav_created">Favorito creado!</string>
+    <string name="fav_removed">Favorito borrado!</string>
+    <string name="fav_empty">No tienes ningún favorito</string>
+    
     <!-- Other -->
 
     <string name="select_city">Selecciona tu ciudad</string>

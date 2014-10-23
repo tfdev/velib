@@ -27,7 +27,7 @@
 	        android:textSize="14sp"
 	        android:textStyle="italic"
 	        android:textColor="@color/logo_blue"
-	        android:text="340m" />
+	        android:text="..." />
     
 	    <ImageView
 	        android:id="@+id/bike"
@@ -45,7 +45,7 @@
 	        android:layout_height="wrap_content"
 	        android:textSize="30sp"
 	        android:layout_marginTop="2dp"
-	        android:text="34"
+	        android:text="."
 	        android:gravity="center"
 	        android:layout_alignParentTop="true"
 	        android:layout_toLeftOf="@id/bike" />
@@ -69,7 +69,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_toLeftOf="@id/parking"
 	        android:layout_alignParentBottom="true"
-	        android:text="9"
+	        android:text="."
 	        android:gravity="center"
 	        android:layout_marginBottom="4dp"
 	        android:textSize="30sp" />
@@ -81,7 +81,7 @@
 	        android:layout_centerVertical="true"
 	        android:layout_marginLeft="46dp"
 	        android:layout_marginRight="82dp"
-			android:text="Place du bataillon Français de l'ONU"
+			android:text="..."
 			android:paddingTop="6dp"
 	        android:gravity="left"
 	        android:textColor="#4a4a4a"

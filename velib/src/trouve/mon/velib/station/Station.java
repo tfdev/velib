@@ -2,7 +2,8 @@ package trouve.mon.velib.station;
 
 import java.sql.Date;
 
-import trouve.mon.velib.util.Formatter;
+import trouve.mon.velib.util.Helper;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +35,9 @@ public class Station {
 	private int availableBikes;
 	private Date lastUpDate;
 
+	private int distanceFromLocation;
+	
+	private Location stationLocation;
 	
 	//----------------- Instance Methods ------------------
 	
@@ -118,7 +122,7 @@ public class Station {
 	
 	@Override
 	public String toString(){
-		return Formatter.formatName(name);
+		return Helper.formatName(name);
 	}
 	
 	public boolean isDifferent(MarkerWrapper markerWrapper){
@@ -134,5 +138,22 @@ public class Station {
 
 	public void setFavorite(boolean favorite) {
 		this.favorite = favorite;
+	}
+
+	public int getDistanceFromLocation() {
+		return distanceFromLocation;
+	}
+
+	public void setDistanceFromLocation(int distanceFromLocation) {
+		this.distanceFromLocation = distanceFromLocation;
+	}
+	
+	public Location getLocation(){
+		if(stationLocation == null){
+			stationLocation = new Location("");
+			stationLocation.setLatitude(position.latitude);
+			stationLocation.setLongitude(position.longitude);
+		}
+		return stationLocation;
 	}
 }

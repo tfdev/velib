@@ -16,6 +16,10 @@
     <string name="msg_here">at this location</string>
     <string name="msg_waiting_gps">Waiting for your location&#8230;</string>
 
+    <string name="fav_created">Favorite created!</string>
+    <string name="fav_removed">Favorite removed!</string>
+    <string name="fav_empty">You do not have any favorite</string>
+    
     <!-- Other -->
 
     <string name="select_city">Select your city</string>

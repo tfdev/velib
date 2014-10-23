@@ -58,7 +58,7 @@ public class StationUpdater implements Runnable{
 	        else{
 	        	mainActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						Helper.showMessage(mainActivity, mainActivity.getString(R.string.msg_no_data)); 
+						Helper.showMessageLong(R.string.msg_no_data); 
 					}
 				});
 	        }
@@ -68,7 +68,7 @@ public class StationUpdater implements Runnable{
 			Log.e(TAG, "Exception while downloading info", e);
 			mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
-					Helper.showMessage(mainActivity, mainActivity.getString(R.string.msg_check_internet));
+					Helper.showMessageLong(R.string.msg_check_internet);
 				}
 			});
 		}

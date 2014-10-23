@@ -1,6 +1,6 @@
 package trouve.mon.velib.station;
 
-import trouve.mon.velib.ResourceFactory;
+import trouve.mon.velib.util.ResourceFactory;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,7 +20,7 @@ public class MarkerManager {
 	// ----------------- Static Methods ------------------
 	
 	public static MarkerManager getInstance(GoogleMap map, ResourceFactory delegate){
-		if(INSTANCE == null){
+		if(INSTANCE == null && map != null && delegate != null){
 			INSTANCE = new MarkerManager(map, delegate);
 		}
 		return INSTANCE;
@@ -175,19 +175,16 @@ public class MarkerManager {
 			markerWrapper.getMarker().remove();
 		}
 
-		Marker marker = null;
+		Marker marker = addMarker(station, MarkerSize.BIG);
 		if (map.getCameraPosition().zoom > MID_ZOOM_LEVEL) {
-			marker = addMarker(station, MarkerSize.BIG);
 			normalMarkers.put(detailedStationNumber, new MarkerWrapper(marker, station));
 			for (int i = 0, nsize = normalMarkers.size(); i < nsize; i++)
 				normalMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		} else if (map.getCameraPosition().zoom > TINY_ZOOM_LEVEL) {
-			marker = addMarker(station, MarkerSize.NORMAL);
 			midMarkers.put(detailedStationNumber, new MarkerWrapper(marker, station));
 			for (int i = 0, nsize = midMarkers.size(); i < nsize; i++)
 				midMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
 		} else {
-			marker = addMarker(station, MarkerSize.NORMAL);
 			tinyMarkers.put(detailedStationNumber, new MarkerWrapper(marker, station));
 			for (int i = 0, nsize = tinyMarkers.size(); i < nsize; i++)
 				tinyMarkers.valueAt(i).getMarker().setAlpha(HIGHLIGHT_ALPHA);
