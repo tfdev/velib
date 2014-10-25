@@ -9,7 +9,7 @@ import java.util.Set;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
-import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.MyPreferenceManager;
 import android.location.Location;
 import android.util.Log;
@@ -94,16 +94,16 @@ public class StationManager {
 	
 	public List<Station> getNearByStations(){
 		List<Station> closeStations = new ArrayList<Station>(100);
-		if(!LocationClientSingleton.getClient().isConnected()){
+		if(!LocationClientManager.getClient().isConnected()){
 			Helper.showMessageLong(R.string.msg_waiting_gps);
 		}
 		else{
 			int maxSize = 5;
-			int maxDistance = LocationClientSingleton.distanceFromLastLocation(stationMap.valueAt(0));
+			int maxDistance = LocationClientManager.distanceFromLastLocation(stationMap.valueAt(0));
 			closeStations.add(stationMap.valueAt(0));
 			for (int i = 1, nsize = stationMap.size(); i < nsize; i++) {
 				Station station = stationMap.valueAt(i);
-				int distance = LocationClientSingleton.distanceFromLastLocation(station);
+				int distance = LocationClientManager.distanceFromLastLocation(station);
 				if(closeStations.size() < maxSize){
 					
 					// closeStation is sorted descending
@@ -151,7 +151,7 @@ public class StationManager {
 	
 	public List<Station> getNearByStationsSmart(){
 		List<Station> closeStations = new ArrayList<Station>(100);
-		if(!LocationClientSingleton.getClient().isConnected()){
+		if(!LocationClientManager.getClient().isConnected()){
 			Helper.showMessageLong(R.string.msg_waiting_gps);
 		}
 		else{
@@ -159,12 +159,12 @@ public class StationManager {
 			float delta = DELTA;
 			// TODO enhance this !
 			
-			Location lastLocation = LocationClientSingleton.getClient().getLastLocation();
+			Location lastLocation = LocationClientManager.getClient().getLastLocation();
 			for (int i = 0, nsize = stationMap.size(); i < nsize; i++) {
 				Station station = stationMap.valueAt(i);
 				if(Math.abs(station.getPosition().latitude - lastLocation.getLatitude()) < delta &&
 					Math.abs(station.getPosition().longitude - lastLocation.getLongitude()) < delta ){
-					LocationClientSingleton.distanceFromLastLocation(station);
+					LocationClientManager.distanceFromLastLocation(station);
 					closeStations.add(station);
 				}
 			}

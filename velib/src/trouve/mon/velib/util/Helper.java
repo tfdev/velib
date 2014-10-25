@@ -3,8 +3,6 @@ package trouve.mon.velib.util;
 import java.text.DecimalFormat;
 
 import trouve.mon.velib.R;
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
@@ -16,13 +14,13 @@ public class Helper {
 	
 	private static Context context;
 	
-	public static final void setUpActionBarCustomTheme(Activity activity) {
+	/*public static final void setUpActionBarCustomTheme(Activity activity) {
 		activity.setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = activity.getActionBar();
 	    actionBar.setDisplayShowTitleEnabled(false);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(true);
-	}
+	}*/
 	
 	public static void showMessageQuick(int resId) {
 		Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show();

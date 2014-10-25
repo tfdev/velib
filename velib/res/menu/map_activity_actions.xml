@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
     
     
     <!--  item android:id="@+id/action_favorite"
@@ -10,13 +11,12 @@
     <item android:id="@+id/action_refresh"
           android:icon="@drawable/ic_action_refresh"
           android:title="@string/action_refresh"
-          android:showAsAction="always"
-          android:actionLayout="@layout/refresh_view" />
+          custom:showAsAction="always" />
     
     <item android:id="@+id/action_settings"
           android:icon="@drawable/ic_action_settings"
           android:title="@string/action_settings"
-          android:showAsAction="never" />
+          custom:showAsAction="never" />
     
     <!--  item android:id="@+id/action_about"
           android:icon="@drawable/ic_action_about"

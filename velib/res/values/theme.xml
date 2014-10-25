@@ -4,27 +4,35 @@
     <!-- the theme applied to the application or activity -->
     
     <style name="CustomActionBarTheme"
-           parent="@android:style/Theme.Holo.Light">
+           parent="@style/Theme.AppCompat.Light.DarkActionBar">
         
-        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
-    
+          
+        <!-- Support library compatibility -->   
+        <item name="actionBarStyle">@style/MyActionBar</item>
+    	
     </style>
 
     
     <!-- ActionBar styles -->
     
     <style name="MyActionBar"
-           parent="@android:style/Widget.Holo.ActionBar">
+           parent="@style/Widget.AppCompat.Light.ActionBar">
         
         <item name="android:background">@drawable/actionbar_drawable</item>
         <item name="android:titleTextStyle">@style/MyTextAppearance</item>
+
+
+        <!-- Support library compatibility -->
+        <item name="background">@drawable/actionbar_drawable</item>
+        <item name="titleTextStyle">@style/MyTextAppearance</item>
+
     
     </style>
     
     <!-- Text Appearance styles -->
     
-    <style name="MyTextAppearance" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+    <style name="MyTextAppearance" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
     	
     	<item name="android:textColor">#ffffff</item>
 	

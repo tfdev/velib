@@ -2,10 +2,11 @@ package trouve.mon.velib.station;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
-import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.ResourceFactory;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +90,7 @@ public class GoogleMapFragment extends SupportMapFragment implements OnMyLocatio
 	}
 	
 	public void centerMapOnMyLocation(boolean animateCamera){
-		LocationClient locationClient = LocationClientSingleton.getClient();
+		LocationClient locationClient = LocationClientManager.getClient();
     	if(locationClient != null){
     		Location lastLocation = locationClient.getLastLocation();
     		if(lastLocation != null){
@@ -110,7 +111,7 @@ public class GoogleMapFragment extends SupportMapFragment implements OnMyLocatio
 	
 	private DetailFragment getDetailFragment(){
 		DetailFragment detailFragment = null;
-		android.support.v4.app.Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
+		Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
 		if(fragment != null){
 			detailFragment = (DetailFragment) fragment;
 		}

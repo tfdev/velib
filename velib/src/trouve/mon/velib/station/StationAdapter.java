@@ -4,7 +4,7 @@ import java.util.List;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
-import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.LocationClientManager;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -72,7 +72,7 @@ public class StationAdapter extends ArrayAdapter<Station> {
 			holder.name.setText(station.toString());
 			holder.bikes.setText(String.valueOf(station.getAvailableBikes()));
 			holder.stands.setText(String.valueOf(station.getAvailableBikeStands()));
-			int distance = LocationClientSingleton.distanceFromLastLocation(station);
+			int distance = LocationClientManager.distanceFromLastLocation(station);
 			holder.distance.setText(Helper.formatDistance(distance));
 			holder.star.setTag(Integer.valueOf(station.getNumber()));
 			setFavImageOnDetailView(station, holder.star);

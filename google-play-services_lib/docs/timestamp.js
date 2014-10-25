@@ -1,1 +1,0 @@
-var BUILD_TIMESTAMP = "16 May 2014 16:49";

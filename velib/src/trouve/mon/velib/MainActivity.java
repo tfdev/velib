@@ -7,35 +7,32 @@ import java.util.concurrent.TimeUnit;
 
 import trouve.mon.velib.contract.ContractListActivity;
 import trouve.mon.velib.station.DetailFragment;
-import trouve.mon.velib.station.GoogleMapFragment;
 import trouve.mon.velib.station.FavoriteListFragment;
+import trouve.mon.velib.station.GoogleMapFragment;
 import trouve.mon.velib.station.NearbyListFragment;
 import trouve.mon.velib.station.StationManager;
 import trouve.mon.velib.station.StationUpdater;
 import trouve.mon.velib.util.Helper;
-import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.MyPreferenceManager;
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.Tab;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.google.android.gms.location.LocationClient;
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener{
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener{
 
 	//----------------- Static Fields ------------------
 
@@ -46,9 +43,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
     //-----------------  Instance Fields ------------------
 	
-	private Menu menu;
-	
-	private Animation refreshButtonAnimation;
+	private MenuItem menuItem;
 
 	private boolean refreshing = false;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -97,15 +92,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		this.menu = menu;
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.map_activity_actions, menu);
-	    menu.findItem(R.id.action_refresh).getActionView().setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				startRefresh();
-			}
-		}); 
-	    return super.onCreateOptionsMenu(menu);
+	    getMenuInflater().inflate(R.menu.map_activity_actions, menu);
+	    menuItem = menu.findItem(R.id.action_refresh);
+	    return true;
 	}
 	
 	
@@ -138,7 +127,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
 	private void setUpAndConnectLocationClient() {
         if(locationClient == null){
-        	locationClient = LocationClientSingleton.setUp(getApplicationContext(), getSupportFragmentManager());
+        	locationClient = LocationClientManager.setUp(getApplicationContext(), getSupportFragmentManager());
         }
         locationClient.connect();
     }
@@ -151,7 +140,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
 	private void setActionBarTitle(){
 		setTheme(R.style.CustomActionBarTheme);
-		ActionBar actionBar = getActionBar();
+		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle(MyPreferenceManager.getPreferredService());
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
@@ -159,7 +148,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	}
 	
 	private void setActionBarTabs(){
-	    ActionBar actionBar = getActionBar();
+	    ActionBar actionBar = getSupportActionBar();
 	    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 	    Tab tab = actionBar.newTab()
@@ -238,23 +227,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
     public void showRefreshing(){
     	refreshing = true;
-    	if(menu != null){
-	        MenuItem item = menu.findItem(R.id.action_refresh);
-
-        	if(refreshButtonAnimation == null){
-        		refreshButtonAnimation = AnimationUtils.loadAnimation(this, R.anim.refresh);
-        		refreshButtonAnimation.setRepeatCount(Animation.INFINITE);
-        	}
-        	item.getActionView().findViewById(R.id.btn_refresh).startAnimation(refreshButtonAnimation);
+    	if(menuItem != null){
+        	MenuItemCompat.setActionView(menuItem, R.layout.refresh_view);
     	}
     }
     public void stopRefreshing(){
     	refreshing = false;
-    	if(menu != null){
-	        MenuItem item = menu.findItem(R.id.action_refresh);
-	        if(item.getActionView() != null){
-	        	item.getActionView().findViewById(R.id.btn_refresh).clearAnimation();
-	        } 
+    	if(menuItem != null){
+    		MenuItemCompat.setActionView(menuItem, null);
     	}
     }
     
@@ -285,9 +265,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 	}
 	
-	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-
-		android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+	public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
 		
 		if(TAB_MAP.equals(tab.getTag()) ){
 			if(mapFragment == null){
@@ -319,14 +297,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				fragmentTransaction.attach(nearbyFragment);
 			}
 		}
-		
-		fragmentTransaction.commit();
 	}
 
-    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-    	
-    	android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-		
+    public void onTabUnselected(Tab tab, FragmentTransaction fragmentTransaction) {
+
     	if(TAB_MAP.equals(tab.getTag()) ){
 	        if (mapFragment != null) {
 	            fragmentTransaction.detach(mapFragment);
@@ -345,11 +319,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				fragmentTransaction.detach(nearbyFragment);
 			}
 		}
-    	
-    	fragmentTransaction.commit();
     }
 
-    public void onTabReselected(Tab tab, FragmentTransaction ft) {
+    public void onTabReselected(Tab tab, FragmentTransaction fragmentTransaction) {
         // User selected the already selected tab
     }
 	

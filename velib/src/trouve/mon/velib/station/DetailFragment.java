@@ -3,7 +3,7 @@ package trouve.mon.velib.station;
 
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
-import trouve.mon.velib.util.LocationClientSingleton;
+import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.ResourceFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -142,7 +142,7 @@ public class DetailFragment extends Fragment {
 	}
 	
 	private void displayDistanceDetail(Station station){
-		int distance = LocationClientSingleton.distanceFromLastLocation(station);
+		int distance = LocationClientManager.distanceFromLastLocation(station);
 		distanceTextView.setText(Helper.formatDistance(distance));
 	}
 	

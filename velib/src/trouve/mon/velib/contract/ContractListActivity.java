@@ -4,7 +4,6 @@ import java.util.List;
 
 import trouve.mon.velib.MainActivity;
 import trouve.mon.velib.R;
-import trouve.mon.velib.util.Helper;
 import trouve.mon.velib.util.MyPreferenceManager;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -33,7 +32,7 @@ public class ContractListActivity extends ListActivity {
 	@Override
     protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		Helper.setUpActionBarCustomTheme(this);
+		//Helper.setUpActionBarCustomTheme(this);
 		setContentView(R.layout.contract_list);
 		setUpOkButton();
 		setUpRefreshButton();

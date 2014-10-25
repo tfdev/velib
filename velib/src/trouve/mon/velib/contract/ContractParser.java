@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.util.JsonReader;
+import trouve.mon.velib.util.JsonReader;
+
 
 /*
  [
