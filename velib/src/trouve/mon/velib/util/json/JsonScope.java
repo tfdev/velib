@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package trouve.mon.velib.util;
+package trouve.mon.velib.util.json;
 
 /**
  * Lexical scoping elements within a JSON reader or writer.

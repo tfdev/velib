@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package trouve.mon.velib.util;
+package trouve.mon.velib.util.json;
 
 import java.io.IOException;
 

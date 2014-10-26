@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import trouve.mon.velib.util.JsonReader;
+import trouve.mon.velib.util.json.JsonReader;
 //import java.sql.Date;
 
 import com.google.android.gms.maps.model.LatLng;

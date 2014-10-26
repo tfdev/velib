@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package trouve.mon.velib.util;
+package trouve.mon.velib.util.json;
 
 /**
  * A structure, name or value type in a JSON-encoded string.

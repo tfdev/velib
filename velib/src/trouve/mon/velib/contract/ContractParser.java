@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import trouve.mon.velib.util.JsonReader;
+import trouve.mon.velib.util.json.JsonReader;
 
 
 /*
