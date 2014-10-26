@@ -11,6 +11,19 @@
         <!-- Support library compatibility -->   
         <item name="actionBarStyle">@style/MyActionBar</item>
     	
+         <!-- colorPrimary is used for the default action bar background -->
+    	<item name="colorPrimary">@color/logo_blue_light</item>
+
+	    <!-- colorPrimaryDark is used for the status bar -->
+	    <item name="colorPrimaryDark">@color/logo_blue</item>
+	
+	    <!-- colorAccent is used as the default value for colorControlActivated,
+	         which is used to tint widgets -->
+	    <item name="colorAccent">@color/logo_blue_light</item>
+	
+	    <!-- You can also set colorControlNormal, colorControlActivated
+	         colorControlHighlight, and colorSwitchThumbNormal. -->
+        
     </style>
 
     
