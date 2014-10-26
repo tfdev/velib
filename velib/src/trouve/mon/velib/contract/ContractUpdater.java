@@ -19,19 +19,22 @@ public class ContractUpdater implements Runnable{
 	
 	//-----------------  Instance Fields ------------------
 	
+	private ContractListFragment fragment;
 	private ContractListActivity activity;
 	
 	//-----------------  Instance Methods ------------------
 	
 	public ContractUpdater(ContractListActivity activity) {
-		this.activity = activity;
+		this.activity= activity;
+		this.fragment = (ContractListFragment) activity.getSupportFragmentManager().findFragmentById(R.id.contract_fragment);		
 	}
 	
 	public void run() {
 		HttpURLConnection connection = null;
-		activity.runOnUiThread(new Runnable() {
+		fragment.getActivity().runOnUiThread(new Runnable() {
 			public void run() {
-				activity.showLoading();
+				activity.showRefreshing();
+				fragment.showLoading();
 			}
 		});
 		try {
@@ -44,25 +47,25 @@ public class ContractUpdater implements Runnable{
 	        connection.connect();
 	        if(connection.getResponseCode() == 200){
 	        	final List<Contract> contracts = ContractParser.parse(connection.getInputStream());
-	        	activity.runOnUiThread(new Runnable() {
+	        	fragment.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
-						activity.setContract(contracts);
+						fragment.setContract(contracts);
 					}
 				});
 	        }
 	        else{
-	        	activity.runOnUiThread(new Runnable() {
+	        	fragment.getActivity().runOnUiThread(new Runnable() {
 					public void run() {
-						activity.showError(R.string.msg_no_data); 
+						fragment.showError(R.string.msg_no_data); 
 					}
 				});
 	        }
 		}
 		catch (Exception e) {
 			Log.e(TAG, "Exception while downloading info", e);
-			activity.runOnUiThread(new Runnable() {
+			fragment.getActivity().runOnUiThread(new Runnable() {
 				public void run() {
-					activity.showError(R.string.msg_check_internet);
+					fragment.showError(R.string.msg_check_internet);
 				}
 			});
 		}
@@ -70,6 +73,11 @@ public class ContractUpdater implements Runnable{
 			if(connection != null){
 				connection.disconnect();
 			}
+			fragment.getActivity().runOnUiThread(new Runnable() {
+				public void run() {
+					activity.hideRefreshing();
+				}
+			});
 		}
 	}
 	

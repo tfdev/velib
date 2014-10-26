@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    getMenuInflater().inflate(R.menu.map_activity_actions, menu);
+	    getMenuInflater().inflate(R.menu.main_actions, menu);
 	    menuItem = menu.findItem(R.id.action_refresh);
 	    return true;
 	}
@@ -142,6 +142,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle(MyPreferenceManager.getPreferredService());
+		//actionBar.setSubtitle(MyPreferenceManager.getPreferredContract());
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(false);
