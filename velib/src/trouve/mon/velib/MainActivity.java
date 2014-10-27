@@ -142,7 +142,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle(MyPreferenceManager.getPreferredService());
-		//actionBar.setSubtitle(MyPreferenceManager.getPreferredContract());
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(false);

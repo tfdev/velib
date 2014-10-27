@@ -5,6 +5,7 @@
 	<color name="logo_blue"> #2c86b7 </color>
 	<color name="logo_blue_light"> #4C98C2 </color>
 	<color name="star_yellow"> #f4ac00 </color>
+	<color name="white"> #ffffff </color>
 	
 	
 </resources>

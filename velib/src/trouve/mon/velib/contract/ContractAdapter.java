@@ -5,6 +5,7 @@ import java.util.List;
 import trouve.mon.velib.R;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,13 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 	Context context;
 	int resource;
 	List<Contract> contracts;
+	
+	int selectedItemPosition = -1;
+
+
+	public void selectItem(int i) {
+		selectedItemPosition = i;
+	}
 	
 	public ContractAdapter(Context context, int resource, List<Contract> objects) {
 		super(context, resource, objects);
@@ -55,6 +63,13 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 			}else{
 				holder.flag.setImageResource(android.R.color.transparent);
 			}
+		}
+		
+		if (position == selectedItemPosition) {
+			row.setBackgroundColor(context.getResources().getColor(R.color.highlighted_blue));
+		}
+		else {
+			row.setBackgroundColor(Color.TRANSPARENT);
 		}
 		
 		return row;

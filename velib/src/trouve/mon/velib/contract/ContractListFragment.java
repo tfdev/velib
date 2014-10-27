@@ -49,6 +49,8 @@ public class ContractListFragment extends ListFragment {
 	public void onListItemClick (ListView l, View v, int position, long id){
 		selectedContract = (Contract) getListView().getItemAtPosition(position);
 		okButton.setEnabled(true);
+		((ContractAdapter) l.getAdapter()).selectItem(position);
+		l.invalidateViews();
 	}
 	
 	public void showError(int stringResourceId){

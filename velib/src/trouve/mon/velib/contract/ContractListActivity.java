@@ -61,7 +61,7 @@ public class ContractListActivity extends ActionBarActivity {
 	
 	private void setUpActionBar() {
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setIcon(R.drawable.ic_launcher);
+		actionBar.setTitle(R.string.select_city);
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
 	    actionBar.setDisplayUseLogoEnabled(false);

@@ -34,18 +34,6 @@
     	
     </RelativeLayout>
     
-    <TextView
-        android:id="@+id/listHeader"
-        android:text="@string/select_city"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center" 
-		android:scrollbars="none"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-		style="?android:attr/listSeparatorTextViewStyle" />
-    
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleLarge"
@@ -69,9 +57,10 @@
         android:id="@id/android:list"
         android:layout_width="match_parent"
        	android:layout_height="wrap_content"
-        android:layout_below="@id/listHeader"
+       	android:background="@drawable/bar_drawable"
+       	android:divider="@android:color/transparent"
+    	android:dividerHeight="0px"
         android:layout_above="@id/ok_bar"
-        android:listSelector="@color/highlighted_blue"
         android:choiceMode="singleChoice"/>
     
 </RelativeLayout>

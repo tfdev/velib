@@ -4,12 +4,7 @@
     <!-- the theme applied to the application or activity -->
     
     <style name="CustomActionBarTheme"
-           parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
-          
-        <!-- Support library compatibility -->   
-        <item name="actionBarStyle">@style/MyActionBar</item>
+           parent="Theme.AppCompat.Light.DarkActionBar">          
     	
          <!-- colorPrimary is used for the default action bar background -->
     	<item name="colorPrimary">@color/logo_blue_light</item>
@@ -19,36 +14,12 @@
 	
 	    <!-- colorAccent is used as the default value for colorControlActivated,
 	         which is used to tint widgets -->
-	    <item name="colorAccent">@color/logo_blue_light</item>
+	    <item name="colorAccent">@color/white</item>
 	
 	    <!-- You can also set colorControlNormal, colorControlActivated
 	         colorControlHighlight, and colorSwitchThumbNormal. -->
         
     </style>
 
-    
-    <!-- ActionBar styles -->
-    
-    <style name="MyActionBar"
-           parent="@style/Widget.AppCompat.Light.ActionBar">
-        
-        <item name="android:background">@drawable/actionbar_drawable</item>
-        <item name="android:titleTextStyle">@style/MyTextAppearance</item>
-
-
-        <!-- Support library compatibility -->
-        <item name="background">@drawable/actionbar_drawable</item>
-        <item name="titleTextStyle">@style/MyTextAppearance</item>
-
-    
-    </style>
-    
-    <!-- Text Appearance styles -->
-    
-    <style name="MyTextAppearance" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
-    	
-    	<item name="android:textColor">#ffffff</item>
-	
-	</style>
     
 </resources>
