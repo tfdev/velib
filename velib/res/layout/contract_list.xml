@@ -23,6 +23,7 @@
     	<Button
 	        android:id="@+id/okButton"
 	        android:enabled="false"
+	        android:textColor="@color/button_state_color"
 	        android:background="@drawable/selector_btn_background"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"

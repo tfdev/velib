@@ -66,10 +66,12 @@ public class ContractAdapter extends ArrayAdapter<Contract> {
 		}
 		
 		if (position == selectedItemPosition) {
-			row.setBackgroundColor(context.getResources().getColor(R.color.highlighted_blue));
+			row.setBackgroundColor(context.getResources().getColor(R.color.logo_blue_light));
+			holder.contrat.setTextColor(context.getResources().getColor(R.color.white));
 		}
 		else {
 			row.setBackgroundColor(Color.TRANSPARENT);
+			holder.contrat.setTextColor(context.getResources().getColor(R.color.logo_blue));
 		}
 		
 		return row;

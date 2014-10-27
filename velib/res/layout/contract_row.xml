@@ -8,6 +8,7 @@
 	     <TextView
 	         android:id="@+id/contract_name"
 	         style="@android:style/TextAppearance.Large"
+	         android:textColor="@color/logo_blue"
 	         android:layout_alignParentTop="true"
 	         android:layout_marginLeft="10dp"
 	         android:layout_width="match_parent"

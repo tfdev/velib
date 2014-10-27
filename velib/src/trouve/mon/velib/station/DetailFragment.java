@@ -15,7 +15,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -121,12 +120,6 @@ public class DetailFragment extends Fragment {
 				setFavImageOnDetailView(station);
 			}
 		});
-		
-		int color = getResources().getColor(R.color.logo_blue);
-		bikeTextView.setTextColor(color);
-		bikeImageView.setColorFilter(color);
-		standTextView.setTextColor(color);
-		standImageView.setColorFilter(color);
 	}
 	
 	private void setFavorite(Station station, boolean newValue){
@@ -147,9 +140,14 @@ public class DetailFragment extends Fragment {
 	}
 	
 	private void updateDetailInfo(Station station) {
+		int color = ResourceFactory.getInstance(getResources()).getColor(station);
+		bikeImageView.setColorFilter(color);
+		standImageView.setColorFilter(color);
+		bikeTextView.setTextColor(color);
+		standTextView.setTextColor(color);
+		
 		int bikes = station.getAvailableBikes();
 		int stands = station.getAvailableBikeStands();
-		
 		bikeTextView.setText(String.valueOf(bikes));
 		standTextView.setText(String.valueOf(stands));
 		

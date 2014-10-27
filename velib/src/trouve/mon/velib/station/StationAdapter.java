@@ -5,6 +5,7 @@ import java.util.List;
 import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
 import trouve.mon.velib.util.LocationClientManager;
+import trouve.mon.velib.util.ResourceFactory;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -56,12 +57,7 @@ public class StationAdapter extends ArrayAdapter<Station> {
 						setFavImageOnDetailView(station, v);
 					}
 				}
-			});
-            int color = row.getResources().getColor(R.color.logo_blue);
-            holder.bikes.setTextColor(color);
-            holder.stands.setTextColor(color);
-            ((ImageView) row.findViewById(R.id.bike)).setColorFilter(color);
-    		((ImageView) row.findViewById(R.id.parking)).setColorFilter(color);
+			});            
 
             row.setTag(holder);
 		}else{
@@ -76,6 +72,12 @@ public class StationAdapter extends ArrayAdapter<Station> {
 			holder.distance.setText(Helper.formatDistance(distance));
 			holder.star.setTag(Integer.valueOf(station.getNumber()));
 			setFavImageOnDetailView(station, holder.star);
+			
+			int color = ResourceFactory.getInstance(row.getResources()).getColor(station);
+			holder.bikes.setTextColor(color);
+            holder.stands.setTextColor(color);
+            ((ImageView) row.findViewById(R.id.bike)).setColorFilter(color);
+    		((ImageView) row.findViewById(R.id.parking)).setColorFilter(color);
 		}
 		
 		return row;

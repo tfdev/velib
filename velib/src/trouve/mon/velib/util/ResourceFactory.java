@@ -29,7 +29,7 @@ public class ResourceFactory {
 
 	private static ResourceFactory INSTANCE ;
 	
-	public static final int RED = Color.rgb(181, 12, 22);
+	public static final int RED = Color.rgb(229, 28, 35);
 	public static final int ORANGE = Color.rgb(215, 119, 34);
 	public static final int GREEN = Color.rgb(133, 161, 82);
 
@@ -71,6 +71,16 @@ public class ResourceFactory {
 
 	private Resources getResources() {
 		return resources;
+	}
+	
+	public int getColor(Station station){
+		if (station.getStatus() == Status.CLOSED) {
+			return RED;
+		} else if (station.getAvailableBikes() <= 3 || station.getAvailableBikeStands() <= 3) {
+			return ORANGE;
+		} else {
+			return GREEN;
+		}
 	}
 	
 	public BitmapDescriptor getFav() {

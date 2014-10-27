@@ -4,8 +4,13 @@
 	<color name="light_gray"> #D3D3D3 </color>
 	<color name="logo_blue"> #2c86b7 </color>
 	<color name="logo_blue_light"> #4C98C2 </color>
-	<color name="star_yellow"> #f4ac00 </color>
+	
 	<color name="white"> #ffffff </color>
 	
+	<color name="star_yellow"> #f4ac00 </color>
+	
+	<color name="red">#e51c23</color>
+	<color name="orange">#d77722 </color>
+	<color name="green">#85a152 </color>
 	
 </resources>
