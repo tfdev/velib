@@ -1,5 +1,7 @@
 package trouve.mon.velib;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -141,6 +143,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 	private void setActionBarTitle(){
 		setTheme(R.style.CustomActionBarTheme);
 		ActionBar actionBar = getSupportActionBar();
+		actionBar.setSubtitle("");
 		actionBar.setTitle(MyPreferenceManager.getPreferredService());
 	    actionBar.setDisplayShowTitleEnabled(true);
 	    actionBar.setDisplayShowHomeEnabled(true);
@@ -216,6 +219,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		if(favoriteFragment != null){
 			favoriteFragment.refresh();
 		}
+		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setSubtitle(getString(R.string.last_update) + " " + SimpleDateFormat.getTimeInstance().format(new Date()));
 	}
 	
 	private void startRefresh(){

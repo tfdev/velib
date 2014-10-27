@@ -24,6 +24,8 @@
 
     <string name="select_city">Sélectionnez votre ville</string>
 
+    <string name="last_update">mise à jour à</string>
+    
     <!-- Actions -->
 
     <string name="action_settings">Changer de ville</string>

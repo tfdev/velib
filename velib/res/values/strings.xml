@@ -23,6 +23,8 @@
     <!-- Other -->
 
     <string name="select_city">Select your city</string>
+    
+    <string name="last_update">updated at</string>
 
     <!-- Actions -->
 
