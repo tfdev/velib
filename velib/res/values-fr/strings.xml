@@ -14,7 +14,7 @@
     <string name="msg_no_data">Service indisponible</string>
     <string name="msg_no_station">Pas de station</string>
     <string name="msg_here">à cet endroit</string>
-    <string name="msg_waiting_gps">En attente d\'informations de localisation&#8230;</string>
+    <string name="msg_waiting_gps">En attente d\'information de localisation&#8230;</string>
 
     <string name="fav_created">Favori créé !</string>
     <string name="fav_removed">Favori supprimé !</string>
