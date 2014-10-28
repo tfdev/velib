@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   		android:id="@+id/infobar_layout"
+   		android:layout_gravity="top"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:background="@color/white" >
+ 	    
+	   	<TextView
+	        android:id="@+id/message"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_marginLeft="10dp"
+	        android:layout_marginRight="10dp"
+	        android:textColor="@color/red"
+	        android:text="attention"
+	        android:textSize="18sp"
+	        android:maxLines="1"
+	        android:textStyle="italic"
+   	    	android:typeface="sans"  />
+
+</RelativeLayout>
+  		

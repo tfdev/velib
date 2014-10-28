@@ -10,7 +10,7 @@ import android.widget.ListAdapter;
 
 public class NearbyListFragment extends ListFragment {
 
-	public static final String NEARBY_FRAGMENT_TAG = "NEARBY";
+	public static final String FRAGMENT_TAG = "NEARBY";
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

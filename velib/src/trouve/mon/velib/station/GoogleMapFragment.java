@@ -37,7 +37,7 @@ public class GoogleMapFragment extends SupportMapFragment implements OnMyLocatio
 	
 	//private static final String TAG = GoogleMapFragment.class.getName();
 	
-	public static final String MAP_FRAGMENT_TAG = "MAP";
+	public static final String FRAGMENT_TAG = "MAP";
 	private static final float CENTER_ZOOM_LEVEL = 15.5f;
 
     
@@ -111,7 +111,7 @@ public class GoogleMapFragment extends SupportMapFragment implements OnMyLocatio
 	
 	private DetailFragment getDetailFragment(){
 		DetailFragment detailFragment = null;
-		Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.DETAIL_FRAGMENT_TAG);
+		Fragment fragment = getFragmentManager().findFragmentByTag(DetailFragment.FRAGMENT_TAG);
 		if(fragment != null){
 			detailFragment = (DetailFragment) fragment;
 		}

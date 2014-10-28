@@ -10,7 +10,7 @@ import android.widget.ListAdapter;
 
 public class FavoriteListFragment extends ListFragment {
 
-	public static final String FAVORITE_FRAGMENT_TAG = "FAVORITES";
+	public static final String FRAGMENT_TAG = "FAVORITES";
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

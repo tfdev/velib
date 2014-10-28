@@ -22,7 +22,7 @@ public class DetailFragment extends Fragment {
 
 	//----------------- Static Fields ------------------
 	
-	public static final String DETAIL_FRAGMENT_TAG = "DETAIL";
+	public static final String FRAGMENT_TAG = "DETAIL";
 	
 	//-----------------  Instance Fields ------------------
 	
@@ -88,7 +88,7 @@ public class DetailFragment extends Fragment {
 
 	private MarkerManager getMarkerManager(){
 		if(markerManager == null){
-			Fragment fragment = getFragmentManager().findFragmentByTag(GoogleMapFragment.MAP_FRAGMENT_TAG);
+			Fragment fragment = getFragmentManager().findFragmentByTag(GoogleMapFragment.FRAGMENT_TAG);
 			if(fragment != null){
 				SupportMapFragment mapFragment = (SupportMapFragment) fragment;
 				markerManager = MarkerManager.getInstance(mapFragment.getMap(), ResourceFactory.getInstance(getResources()));

@@ -79,7 +79,7 @@ public class LocationClientManager {
 		@Override
 		public void onConnected(Bundle connectionHint) {
 			locationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
-			Fragment fragment = fragmentManager.findFragmentByTag(GoogleMapFragment.MAP_FRAGMENT_TAG);
+			Fragment fragment = fragmentManager.findFragmentByTag(GoogleMapFragment.FRAGMENT_TAG);
 			if(fragment != null){
 				GoogleMapFragment mapFragment = (GoogleMapFragment) fragment;
 				mapFragment.centerMapOnMyLocation(false);
