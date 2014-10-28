@@ -35,7 +35,7 @@ public class Station {
 	private int availableBikes;
 	private Date lastUpDate;
 
-	private int distanceFromLocation;
+	private int cacheDistanceFromLocation;
 	
 	private Location stationLocation;
 	
@@ -140,12 +140,12 @@ public class Station {
 		this.favorite = favorite;
 	}
 
-	public int getDistanceFromLocation() {
-		return distanceFromLocation;
+	public int getCacheDistanceFromLocation() {
+		return cacheDistanceFromLocation;
 	}
 
-	public void setDistanceFromLocation(int distanceFromLocation) {
-		this.distanceFromLocation = distanceFromLocation;
+	public void setCacheDistanceFromLocation(int distanceFromLocation) {
+		this.cacheDistanceFromLocation = distanceFromLocation;
 	}
 	
 	public Location getLocation(){

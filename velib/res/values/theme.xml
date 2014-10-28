@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     
     <!-- the theme applied to the application or activity -->
     
@@ -19,7 +19,38 @@
 	    <!-- You can also set colorControlNormal, colorControlActivated
 	         colorControlHighlight, and colorSwitchThumbNormal. -->
         
+        
+        <!-- declared twice -->
+        <item name="android:actionBarStyle">@style/MyActionBar</item>   
+        <item name="actionBarStyle">@style/MyActionBar</item>
+        
     </style>
 
+
+	<!-- ActionBar styles -->
+    
+    <style name="MyActionBar"
+           parent="@style/Widget.AppCompat.ActionBar.Solid">
+        
+        <item name="android:backgroundStacked">@drawable/tabbar_drawable</item>
+        <item name="backgroundStacked">@drawable/tabbar_drawable</item>
+        
+        <item name="android:background">@drawable/actionbar_drawable</item>
+        <item name="background">@drawable/actionbar_drawable</item>
+        
+        <item name="android:subtitleTextStyle">@style/MyTextAppearance</item>
+        <item name="subtitleTextStyle">@style/MyTextAppearance</item>
+    
+    </style>
+    
+    <!-- Text Appearance styles -->
+    
+    <style name="MyTextAppearance" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
+    	
+    	<item name="android:textColor">@color/light_gray</item>
+    	<item name="android:textStyle">italic</item>
+    	<item name="android:textSize">12sp</item>
+	
+	</style>
     
 </resources>

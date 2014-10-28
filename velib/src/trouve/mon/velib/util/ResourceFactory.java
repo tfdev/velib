@@ -74,7 +74,7 @@ public class ResourceFactory {
 	}
 	
 	public int getColor(Station station){
-		if (station.getStatus() == Status.CLOSED) {
+		if (station.getStatus() == Status.CLOSED || (station.getAvailableBikes() == 0 && station.getAvailableBikeStands() == 0)) {
 			return RED;
 		} else if (station.getAvailableBikes() <= 3 || station.getAvailableBikeStands() <= 3) {
 			return ORANGE;
@@ -337,7 +337,7 @@ public class ResourceFactory {
 	public BitmapDescriptor getBigMarkerBitmapDescriptor(Station station) {
 		int color, bikes = station.getAvailableBikes(), stands = station.getAvailableBikeStands();
 		Bitmap bitmap = null;
-		if (station.getStatus() == Status.CLOSED) {
+		if (station.getStatus() == Status.CLOSED || (bikes == 0 && stands == 0)) {
 			if (station.isFavorite())
 				bitmap = getMarkerRedBigFav().copy(Bitmap.Config.ARGB_8888, true);
 			else

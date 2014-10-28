@@ -11,6 +11,7 @@ import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
 import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.MyPreferenceManager;
+import android.R.bool;
 import android.location.Location;
 import android.util.Log;
 import android.util.SparseArray;
@@ -27,6 +28,7 @@ public class StationManager {
 	private static final int STATION_COUNT = 2000;
 	
 	private static final float DELTA = 0.006f;
+	private static final float MAX_DELTA = 0.0121f;
 	
 	//----------------- Static Methods ------------------
 	
@@ -86,69 +88,18 @@ public class StationManager {
 			if(stationNumber == null){
 				Log.e(TAG, "Impossible to retrieve favorites from "+s);
 			}else{
-				favoriteStations.add(get(stationNumber));
+				Station station = get(stationNumber);
+				LocationClientManager.distanceFromLastLocation(station);
+				favoriteStations.add(station);
 			}
 		}
+		
+		Collections.sort(favoriteStations, new StationComparator());
 		return favoriteStations;
 	}
 	
-	public List<Station> getNearByStations(){
-		List<Station> closeStations = new ArrayList<Station>(100);
-		if(!LocationClientManager.getClient().isConnected()){
-			Helper.showMessageLong(R.string.msg_waiting_gps);
-		}
-		else{
-			int maxSize = 5;
-			int maxDistance = LocationClientManager.distanceFromLastLocation(stationMap.valueAt(0));
-			closeStations.add(stationMap.valueAt(0));
-			for (int i = 1, nsize = stationMap.size(); i < nsize; i++) {
-				Station station = stationMap.valueAt(i);
-				int distance = LocationClientManager.distanceFromLastLocation(station);
-				if(closeStations.size() < maxSize){
-					
-					// closeStation is sorted descending
-					if(distance <= maxDistance){
-						boolean added = false;
-						for(int j = 1; !added && j < closeStations.size(); j++){
-							if(distance >= closeStations.get(j).getDistanceFromLocation()){
-								closeStations.add(j, station);
-								added = true;
-							}
-						}
-						if(!added){
-							closeStations.add(station);
-						}
-					}
-					else{ // it is a new maxDistance
-						closeStations.add(0, station);
-						maxDistance = distance;
-					}
-				}
-				else{ 
-					if(distance <= maxDistance){
-						boolean added = false;
-						for(int j = 1; !added && j < closeStations.size(); j++){
-							if(distance >= closeStations.get(j).getDistanceFromLocation()){
-								closeStations.add(j, station);
-								added = true;
-							}
-						}
-						if(!added){
-							closeStations.add(station);
-						}
-					}
-				}
-			}
-		}
-		
-		List<Station> ascending = new ArrayList<Station>(5);
-		for(int i=closeStations.size()-1; i > 0 && ascending.size() < 5; i--){
-			ascending.add(closeStations.get(i));
-		}
-		
-		return ascending;
-	}
-	
+	// WARNING !!!
+	// TODO we shall wait for station list first load to be completed
 	public List<Station> getNearByStationsSmart(){
 		List<Station> closeStations = new ArrayList<Station>(100);
 		if(!LocationClientManager.getClient().isConnected()){
@@ -156,16 +107,24 @@ public class StationManager {
 		}
 		else{
 			
-			float delta = DELTA;
-			// TODO enhance this !
-			
+			float delta = DELTA;	
 			Location lastLocation = LocationClientManager.getClient().getLastLocation();
-			for (int i = 0, nsize = stationMap.size(); i < nsize; i++) {
-				Station station = stationMap.valueAt(i);
-				if(Math.abs(station.getPosition().latitude - lastLocation.getLatitude()) < delta &&
-					Math.abs(station.getPosition().longitude - lastLocation.getLongitude()) < delta ){
-					LocationClientManager.distanceFromLastLocation(station);
-					closeStations.add(station);
+			boolean finished = false;
+			while( ! finished){
+				for (int i = 0, nsize = stationMap.size(); i < nsize; i++) {
+					Station station = stationMap.valueAt(i);
+					if(Math.abs(station.getPosition().latitude - lastLocation.getLatitude()) < delta &&
+						Math.abs(station.getPosition().longitude - lastLocation.getLongitude()) < delta ){
+						LocationClientManager.distanceFromLastLocation(station);
+						closeStations.add(station);
+					}
+				}
+				if(delta > MAX_DELTA || closeStations.size() >= 3){
+					finished = true;
+				}
+				else {
+					closeStations.clear();
+					delta += DELTA;
 				}
 			}
 		}
@@ -179,8 +138,8 @@ public class StationManager {
 		 
 	    @Override
 	    public int compare(Station s1, Station s2) {
-	        return (s1.getDistanceFromLocation() > s2.getDistanceFromLocation() ? 1 : 
-	        	(s1.getDistanceFromLocation() == s2.getDistanceFromLocation() ? 0 : -1));
+	        return (s1.getCacheDistanceFromLocation() > s2.getCacheDistanceFromLocation() ? 1 : 
+	        	(s1.getCacheDistanceFromLocation() == s2.getCacheDistanceFromLocation() ? 0 : -1));
 	    }
 	} 
 	

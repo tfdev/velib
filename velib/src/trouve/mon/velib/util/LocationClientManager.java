@@ -39,7 +39,7 @@ public class LocationClientManager {
     		if(lastLocation != null){
     			float result = lastLocation.distanceTo(station.getLocation());
     			int d = Math.round(result);
-    			station.setDistanceFromLocation(d);
+    			station.setCacheDistanceFromLocation(d);
     			return d;
     		}
     	}
