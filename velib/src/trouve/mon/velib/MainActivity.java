@@ -276,13 +276,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		if(TAB_MAP.equals(tab.getTag()) ){
 			if(mapFragment == null){
 	            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
-	            fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.MAP_FRAGMENT_TAG);
+	            fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(mapFragment);
 			}
 			if(detailFragment == null){
 				detailFragment = (DetailFragment) Fragment.instantiate(this, DetailFragment.class.getName());
-				fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.DETAIL_FRAGMENT_TAG);
+				fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(detailFragment);
 			}
@@ -290,7 +290,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		else if(TAB_FAVORITES.equals(tab.getTag())){
 			if(favoriteFragment == null){
 				favoriteFragment = (FavoriteListFragment) Fragment.instantiate(this, FavoriteListFragment.class.getName());
-				fragmentTransaction.add(android.R.id.content, favoriteFragment, FavoriteListFragment.FAVORITE_FRAGMENT_TAG);
+				fragmentTransaction.add(android.R.id.content, favoriteFragment, FavoriteListFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(favoriteFragment);
 			}
@@ -298,7 +298,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		else if(TAB_NEARBY.equals(tab.getTag())){
 			if(nearbyFragment == null){
 				nearbyFragment = (NearbyListFragment) Fragment.instantiate(this, NearbyListFragment.class.getName());
-				fragmentTransaction.add(android.R.id.content, nearbyFragment, NearbyListFragment.NEARBY_FRAGMENT_TAG);
+				fragmentTransaction.add(android.R.id.content, nearbyFragment, NearbyListFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(nearbyFragment);
 			}
