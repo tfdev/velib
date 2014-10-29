@@ -10,6 +10,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -58,6 +60,7 @@ public class GoogleMapFragment extends SupportMapFragment implements OnMyLocatio
                              Bundle savedInstanceState) {
 
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+		view.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 2));
 		setUpResourceDelegate();
 		return view;
 	}

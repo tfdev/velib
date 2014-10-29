@@ -11,7 +11,6 @@ import trouve.mon.velib.R;
 import trouve.mon.velib.util.Helper;
 import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.MyPreferenceManager;
-import android.R.bool;
 import android.location.Location;
 import android.util.Log;
 import android.util.SparseArray;

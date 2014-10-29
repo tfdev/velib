@@ -17,6 +17,7 @@ import trouve.mon.velib.station.StationUpdater;
 import trouve.mon.velib.util.Helper;
 import trouve.mon.velib.util.LocationClientManager;
 import trouve.mon.velib.util.MyPreferenceManager;
+import android.R.anim;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -73,6 +74,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         	return;
         }
 		
+		setContentView(R.layout.main_activity);
 		loadFavorites();
 		setActionBarTitle();
 		setActionBarTabs();   
@@ -273,13 +275,15 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 	
 	public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
 		
+		if(mapFragment == null){
+            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
+            fragmentTransaction.add(R.id.root_layout, mapFragment, GoogleMapFragment.FRAGMENT_TAG);
+		}else{
+			fragmentTransaction.attach(mapFragment);
+		}
+		
 		if(TAB_MAP.equals(tab.getTag()) ){
-			if(mapFragment == null){
-	            mapFragment = (GoogleMapFragment) Fragment.instantiate(this, GoogleMapFragment.class.getName());
-	            fragmentTransaction.add(android.R.id.content, mapFragment, GoogleMapFragment.FRAGMENT_TAG);
-			}else{
-				fragmentTransaction.attach(mapFragment);
-			}
+			
 			if(detailFragment == null){
 				detailFragment = (DetailFragment) Fragment.instantiate(this, DetailFragment.class.getName());
 				fragmentTransaction.add(android.R.id.content, detailFragment, DetailFragment.FRAGMENT_TAG);
@@ -290,7 +294,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		else if(TAB_FAVORITES.equals(tab.getTag())){
 			if(favoriteFragment == null){
 				favoriteFragment = (FavoriteListFragment) Fragment.instantiate(this, FavoriteListFragment.class.getName());
-				fragmentTransaction.add(android.R.id.content, favoriteFragment, FavoriteListFragment.FRAGMENT_TAG);
+				fragmentTransaction.add(R.id.root_layout, favoriteFragment, FavoriteListFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(favoriteFragment);
 			}
@@ -298,7 +302,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 		else if(TAB_NEARBY.equals(tab.getTag())){
 			if(nearbyFragment == null){
 				nearbyFragment = (NearbyListFragment) Fragment.instantiate(this, NearbyListFragment.class.getName());
-				fragmentTransaction.add(android.R.id.content, nearbyFragment, NearbyListFragment.FRAGMENT_TAG);
+				fragmentTransaction.add(R.id.root_layout, nearbyFragment, NearbyListFragment.FRAGMENT_TAG);
 			}else{
 				fragmentTransaction.attach(nearbyFragment);
 			}
@@ -308,9 +312,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void onTabUnselected(Tab tab, FragmentTransaction fragmentTransaction) {
 
     	if(TAB_MAP.equals(tab.getTag()) ){
-	        if (mapFragment != null) {
-	            fragmentTransaction.detach(mapFragment);
-	        }
+	        
 	        if (detailFragment != null) {
 	            fragmentTransaction.detach(detailFragment);
 	        }
