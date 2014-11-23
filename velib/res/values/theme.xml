@@ -14,7 +14,7 @@
 	
 	    <!-- colorAccent is used as the default value for colorControlActivated,
 	         which is used to tint widgets -->
-	    <item name="colorAccent">@color/white</item>
+	    <item name="colorAccent">@color/logo_blue_light</item>
 	
 	    <!-- You can also set colorControlNormal, colorControlActivated
 	         colorControlHighlight, and colorSwitchThumbNormal. -->
@@ -32,11 +32,11 @@
     <style name="MyActionBar"
            parent="@style/Widget.AppCompat.ActionBar.Solid">
         
-        <item name="android:backgroundStacked">@drawable/tabbar_drawable</item>
-        <item name="backgroundStacked">@drawable/tabbar_drawable</item>
+        <item name="android:backgroundStacked">@color/white</item>
+        <item name="backgroundStacked">@color/white</item>
         
-        <item name="android:background">@drawable/actionbar_drawable</item>
-        <item name="background">@drawable/actionbar_drawable</item>
+        <!--  item name="android:background">@drawable/actionbar_drawable</item>
+        <item name="background">@drawable/actionbar_drawable</item-->
         
         <item name="android:subtitleTextStyle">@style/MyTextAppearance</item>
         <item name="subtitleTextStyle">@style/MyTextAppearance</item>
